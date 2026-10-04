@@ -17,56 +17,24 @@
   <!-- Scroll Progress & Neon Custom Cursor -->
   <div class="scroll-progress" id="scrollProgress"></div>
   <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
 
-  <!-- FLOATING NAVBAR -->
-  <nav id="nav">
-    <div class="nav-left">
-      <a href="#" class="nav-logo">
-        <i class="fa-solid fa-shield-halved"></i> RETRO <span id="navLogoSpan">AC</span>
-        <span class="nav-logo-badge" id="navGameBadge">OCEAN ED.</span>
-      </a>
-
-      <!-- Theme / Accent Switcher Pill -->
-      <div class="game-switcher-pill">
-        <button class="switcher-btn active crimson-btn" id="btnSwitchCrimson" onclick="switchTheme('crimson')">
-          <i class="fa-solid fa-fire"></i> <span>Crimson Red</span>
-        </button>
-        <button class="switcher-btn purple-btn" id="btnSwitchPurple" onclick="switchTheme('purple')">
-          <i class="fa-solid fa-bolt"></i> <span>Apple Violet</span>
-        </button>
-        <button class="switcher-btn cyan-btn" id="btnSwitchCyan" onclick="switchTheme('cyan')">
-          <i class="fa-solid fa-crosshairs"></i> <span>Cyber Cyan</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="nav-links" id="navLinks">
-      <a href="#control-panel">Yönetim Paneli</a>
-      <a href="#features">Adli Motor</a>
-      <a href="#status">Sistem Durumu</a>
-      <a href="#blacklist">Kara Liste</a>
-      <a href="#faq">SSS</a>
-    </div>
-
-    <div class="nav-actions">
-      <div class="nav-admin-profile" id="navAdminProfile" style="display: none;">
-        <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <span id="navAdminName">Admin</span></span>
-        <button class="btn-logout" onclick="performAdminLogout()" title="Oturumu Kapat">
-          <i class="fa-solid fa-power-off"></i> Çıkış
-        </button>
-      </div>
-      <button class="nav-cta" onclick="document.getElementById('control-panel').scrollIntoView({behavior:'smooth'})">
-        <i class="fa-solid fa-terminal"></i> Canlı Panel
-      </button>
-      <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </div>
-  </nav>
-
-  <!-- ================= FULLSCREEN KEYAUTH LOGIN GATE ================= -->
+  <!-- ================= FULLSCREEN KEYAUTH LOGIN GATE (OVERLORD RGB EDITION) ================= -->
   <div class="auth-gate-overlay" id="authGateOverlay">
-    <div class="auth-gate-card glass-panel">
+    <!-- Ambient Apple Aurora Plasma Light Orbs -->
+    <div class="auth-aurora-bg">
+      <div class="auth-aurora-blob blob-1"></div>
+      <div class="auth-aurora-blob blob-2"></div>
+      <div class="auth-aurora-blob blob-3"></div>
+      <div class="auth-cyber-grid"></div>
+      <div class="auth-scanline"></div>
+    </div>
+
+    <div class="auth-gate-card glass-panel" id="authGateCard">
+      <!-- Animated Border Light Beam -->
+      <div class="card-border-beam"></div>
+
+      <!-- Holographic Overlord Shield HUD -->
       <div class="overlord-shield-icon">
         <span class="tick top"></span>
         <span class="tick bottom"></span>
@@ -84,28 +52,44 @@
               <stop offset="50%" stop-color="var(--accent)" />
               <stop offset="100%" stop-color="var(--accent-dark)" />
             </linearGradient>
+            <linearGradient id="rgbShieldBeam" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff0055"/>
+              <stop offset="50%" stop-color="#7928ca"/>
+              <stop offset="100%" stop-color="#00dfd8"/>
+            </linearGradient>
           </defs>
           <path d="M50 5 L88 19 V48 C88 73 72 91 50 104 C28 91 12 73 12 48 V19 Z"
-                fill="var(--accent-dim)" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round" />
+                fill="var(--accent-dim)" stroke="url(#rgbShieldBeam)" stroke-width="3.5" stroke-linejoin="round" />
           <path d="M50 13 L79 24 V47 C79 65 67 80 50 91 C33 80 21 65 21 47 V24 Z"
                 fill="url(#gateShieldGradient)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round" />
         </svg>
       </div>
 
+      <!-- Live KeyAuth Secured Badge -->
       <div class="auth-gate-badge">
-        <i class="fa-solid fa-lock"></i> RETRO ROLEPLAY • YETKİLİ GİRİŞİ
+        <span class="live-pulse-dot"></span>
+        <i class="fa-solid fa-shield-virus"></i> KEYAUTH v1.2 • ENCRYPTED GATEWAY
       </div>
-      <h2 class="auth-gate-title">ADMIN <span id="authTitleSpan">GİRİŞİ</span></h2>
+
+      <!-- HUGE RGB TITLE REQUESTED BY USER -->
+      <div class="auth-title-container">
+        <h1 class="auth-rgb-main-title">
+          <span class="rgb-gradient-retro">RETRO AC</span>
+          <span class="rgb-neon-sub">LOGIN</span>
+        </h1>
+        <div class="auth-rgb-bar"></div>
+      </div>
+
       <p class="auth-gate-desc">
-        Bu yönetim paneli <strong>KeyAuth</strong> bulut lisans sistemi ile korunmaktadır. Yetkili paneline erişmek için lütfen admin anahtarınızı girin.
+        Bu kontrol merkezi <strong>KeyAuth Cloud Security</strong> ile kilitlenmiştir. Yönetici paneline erişmek için yetkili lisans anahtarınızı giriniz.
       </p>
 
       <form id="authLoginForm" onsubmit="event.preventDefault(); performAdminLogin();">
         <div class="auth-input-group">
-          <label for="adminKeyInput"><i class="fa-solid fa-key"></i> KeyAuth Lisans Anahtarı (Key):</label>
+          <label for="adminKeyInput"><i class="fa-solid fa-fingerprint"></i> KeyAuth Lisans Anahtarı:</label>
           <div class="auth-input-wrapper">
-            <i class="fa-solid fa-shield-halved auth-key-icon"></i>
-            <input type="password" id="adminKeyInput" placeholder="Örn: RETRO-XXXX-XXXX-XXXX" autocomplete="off" required>
+            <i class="fa-solid fa-key auth-key-icon"></i>
+            <input type="password" id="adminKeyInput" placeholder="RETRO-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" required>
             <button type="button" class="btn-toggle-key" onclick="toggleKeyVisibility()" title="Anahtarı Göster/Gizle">
               <i class="fa-solid fa-eye" id="toggleKeyIcon"></i>
             </button>
@@ -115,7 +99,8 @@
         <div class="auth-status-box" id="authStatusBox" style="display: none;"></div>
 
         <button type="submit" class="btn btn-primary btn-auth-submit" id="btnAuthSubmit">
-          <i class="fa-solid fa-right-to-bracket"></i> Paneli Aç (Giriş Yap)
+          <span class="btn-glow-layer"></span>
+          <span class="btn-content-label"><i class="fa-solid fa-bolt"></i> Paneli Aç (Giriş Yap)</span>
         </button>
       </form>
 
@@ -124,14 +109,66 @@
           <i class="fa-solid fa-circle-check" style="color: #10b981;"></i> KeyAuth v1.0 • App: <code>retroac</code>
         </div>
         <p class="auth-hint">Lisans anahtarınızı keyauth.cc panelinden oluşturabilirsiniz.</p>
+        <div class="auth-tamper-warning">
+          <i class="fa-solid fa-shield-halved"></i> Sentinel Anti-Tamper Aktif • Tersine Mühendislik Korumalı
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- HERO SECTION WITH MTA BACKGROUND IMAGE -->
-  <section class="hero">
-    <div class="hero-bg" id="heroBg"></div>
-    <div class="hero-overlay"></div>
+  <!-- ================= PROTECTED ADMIN DASHBOARD APPLICATION (LOCKED UNTIL AUTHENTICATED) ================= -->
+  <div id="protectedApp" class="protected-app locked">
+
+    <!-- FLOATING NAVBAR -->
+    <nav id="nav">
+      <div class="nav-left">
+        <a href="#" class="nav-logo">
+          <i class="fa-solid fa-shield-halved"></i> RETRO <span id="navLogoSpan">AC</span>
+          <span class="nav-logo-badge" id="navGameBadge">OCEAN ED.</span>
+        </a>
+
+        <!-- Theme / Accent Switcher Pill -->
+        <div class="game-switcher-pill">
+          <button class="switcher-btn active crimson-btn" id="btnSwitchCrimson" onclick="switchTheme('crimson')">
+            <i class="fa-solid fa-fire"></i> <span>Crimson Red</span>
+          </button>
+          <button class="switcher-btn purple-btn" id="btnSwitchPurple" onclick="switchTheme('purple')">
+            <i class="fa-solid fa-bolt"></i> <span>Apple Violet</span>
+          </button>
+          <button class="switcher-btn cyan-btn" id="btnSwitchCyan" onclick="switchTheme('cyan')">
+            <i class="fa-solid fa-crosshairs"></i> <span>Cyber Cyan</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="nav-links" id="navLinks">
+        <a href="#control-panel">Yönetim Paneli</a>
+        <a href="#features">Adli Motor</a>
+        <a href="#status">Sistem Durumu</a>
+        <a href="#blacklist">Kara Liste</a>
+        <a href="#faq">SSS</a>
+      </div>
+
+      <div class="nav-actions">
+        <div class="nav-admin-profile" id="navAdminProfile" style="display: none;">
+          <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <span id="navAdminName">Admin</span></span>
+          <button class="btn-logout" onclick="performAdminLogout()" title="Oturumu Kapat">
+            <i class="fa-solid fa-power-off"></i> Çıkış
+          </button>
+        </div>
+        <button class="nav-cta" onclick="document.getElementById('control-panel').scrollIntoView({behavior:'smooth'})">
+          <i class="fa-solid fa-terminal"></i> Canlı Panel
+        </button>
+        <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- HERO SECTION WITH MTA BACKGROUND IMAGE -->
+    <section class="hero">
+      <div class="hero-bg" id="heroBg"></div>
+      <div class="hero-overlay"></div>
 
     <div class="hero-content reveal">
       <div class="hero-badge" id="heroBadge">
@@ -692,6 +729,7 @@
       </div>
     </div>
   </div>
+  </div> <!-- /#protectedApp -->
 
   <!-- TOAST NOTIFICATIONS -->
   <div class="toast-container" id="toastContainer"></div>

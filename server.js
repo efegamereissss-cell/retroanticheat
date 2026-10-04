@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const url = require('url');
 
 const PORT = process.env.PORT || 3000;
 const isVercel = process.env.VERCEL === '1' || process.env.NOW_REGION != null || process.env.AWS_LAMBDA_FUNCTION_NAME != null;
@@ -94,6 +95,36 @@ function verifyLicenseKey(licenseKey, clientIp, callback) {
             }
         });
     });
+}
+
+function getAuthTokenFromRequest(req) {
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        return authHeader.substring(7).trim();
+    }
+    const customHeader = req.headers['x-admin-token'];
+    if (customHeader) return customHeader.trim();
+
+    try {
+        const parsed = url.parse(req.url, true);
+        if (parsed.query && parsed.query.token) return parsed.query.token;
+    } catch (e) { }
+    return null;
+}
+
+function checkAdminAuth(req) {
+    const token = getAuthTokenFromRequest(req);
+    if (!token) return false;
+    return !!authTokens[token];
+}
+
+function sendUnauthorized(res, msg = "Yetkisiz Erişim! KeyAuth lisans anahtarı ile giriş zorunludur.") {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+        error: "UNAUTHORIZED",
+        message: msg,
+        timestamp: new Date().toISOString()
+    }));
 }
 
 // Load config
@@ -240,6 +271,9 @@ const server = http.createServer((req, res) => {
 
     // ================= REAL-TIME SSE STREAM =================
     if (pathname === '/api/events') {
+        if (!checkAdminAuth(req)) {
+            return sendUnauthorized(res, "SSE yetkili akışına bağlanmak için lisans doğrulaması gereklidir.");
+        }
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
@@ -325,6 +359,7 @@ const server = http.createServer((req, res) => {
 
     // GET /api/sessions
     if (pathname === '/api/sessions' && req.method === 'GET') {
+        if (!checkAdminAuth(req)) return sendUnauthorized(res);
         const list = Object.values(sessions).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify(list));
@@ -332,6 +367,7 @@ const server = http.createServer((req, res) => {
 
     // GET /api/sessions/:token
     if (pathname.startsWith('/api/sessions/') && req.method === 'GET') {
+        if (!checkAdminAuth(req)) return sendUnauthorized(res);
         const token = pathname.split('/')[3]?.toUpperCase();
         if (token && sessions[token]) {
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -343,6 +379,7 @@ const server = http.createServer((req, res) => {
 
     // POST /api/sessions/create
     if (pathname === '/api/sessions/create' && req.method === 'POST') {
+        if (!checkAdminAuth(req)) return sendUnauthorized(res);
         readJsonBody(req, body => {
             const token = body.token || `RETRO-${Math.floor(1000 + Math.random() * 9000)}`;
             const suspectName = body.suspectName || 'Şüpheli Oyuncu';
@@ -375,6 +412,7 @@ const server = http.createServer((req, res) => {
 
     // DELETE /api/sessions (Clear all)
     if (pathname === '/api/sessions' && req.method === 'DELETE') {
+        if (!checkAdminAuth(req)) return sendUnauthorized(res);
         sessions = {};
         saveSessions();
         broadcastEvent('sessions_cleared', {});
@@ -491,6 +529,7 @@ const server = http.createServer((req, res) => {
 
     // POST /api/settings/discord
     if (pathname === '/api/settings/discord' && req.method === 'POST') {
+        if (!checkAdminAuth(req)) return sendUnauthorized(res);
         readJsonBody(req, body => {
             config.discordWebhook = (body.webhook || '').trim();
             saveConfig();

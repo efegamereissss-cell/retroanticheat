@@ -34,8 +34,71 @@ function initTheme() {
     switchTheme(saved);
 }
 
-// ================= KEYAUTH ADMIN AUTHENTICATION =================
+// ================= KEYAUTH ADMIN AUTHENTICATION & TAMPER GUARD =================
 let currentAuthToken = null;
+let activeEventSource = null;
+let isTamperTriggered = false;
+
+function triggerTamperLock(reason = "Tersine Mühendislik veya DOM Müdahalesi Tespit Edildi!") {
+    if (isTamperTriggered) return;
+    isTamperTriggered = true;
+    localStorage.removeItem('retro_admin_auth');
+    currentAuthToken = null;
+
+    playSound('alert');
+
+    // Wipe body and show lock screen
+    document.body.innerHTML = `
+        <div class="tamper-lockout-screen">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h1>GÜVENLİK İHLALİ: TERSİNE MÜHENDİSLİK TESPİT EDİLDİ</h1>
+            <p>${escapeHtml(reason)}<br>Giriş ekranı veya yetkili paneli doğrudan manipüle edilmeye çalışıldı. Sistem güvenliği için sayfa imha edildi.</p>
+            <button class="btn btn-primary" style="margin-top: 15px; padding: 15px 30px; font-weight: 800; border-radius: 50px;" onclick="location.reload()">
+                <i class="fa-solid fa-arrows-rotate"></i> Yeniden Başlat & Giriş Yap
+            </button>
+        </div>
+    `;
+
+    console.warn(`%c[RETRO AC SENTINEL] %c${reason}`, 'background: #ff0055; color: #fff; font-size: 16px; font-weight: bold; padding: 6px;', 'color: #00dfd8; font-size: 13px;');
+    throw new Error('SECURITY_TAMPER_DETECTED: ' + reason);
+}
+
+function handleUnauthorized() {
+    localStorage.removeItem('retro_admin_auth');
+    currentAuthToken = null;
+    const overlay = document.getElementById('authGateOverlay');
+    const protectedApp = document.getElementById('protectedApp');
+    const navProfile = document.getElementById('navAdminProfile');
+
+    if (protectedApp) protectedApp.classList.add('locked');
+    if (overlay) overlay.classList.remove('hidden');
+    if (navProfile) navProfile.style.display = 'none';
+    if (activeEventSource) {
+        activeEventSource.close();
+        activeEventSource = null;
+    }
+}
+
+async function authFetch(url, options = {}) {
+    const token = localStorage.getItem('retro_admin_auth');
+    options.headers = options.headers || {};
+    if (token) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+        options.headers['x-admin-token'] = token;
+    }
+    const res = await fetch(url, options);
+    if (res.status === 401 && !url.includes('/api/auth/')) {
+        handleUnauthorized();
+        throw new Error('UNAUTHORIZED');
+    }
+    return res;
+}
+
+function onAuthSuccess() {
+    fetchStats();
+    fetchSessions();
+    initRealtimeEvents();
+}
 
 async function initAuth() {
     const input = document.getElementById('adminKeyInput');
@@ -44,14 +107,19 @@ async function initAuth() {
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') performAdminLogin();
         });
+        input.addEventListener('input', () => {
+            playSound('click');
+        });
     }
 
     const token = localStorage.getItem('retro_admin_auth');
     const overlay = document.getElementById('authGateOverlay');
+    const protectedApp = document.getElementById('protectedApp');
     const navProfile = document.getElementById('navAdminProfile');
 
     if (!token) {
         if (overlay) overlay.classList.remove('hidden');
+        if (protectedApp) protectedApp.classList.add('locked');
         if (navProfile) navProfile.style.display = 'none';
         return false;
     }
@@ -66,21 +134,25 @@ async function initAuth() {
         if (data.valid) {
             currentAuthToken = token;
             if (overlay) overlay.classList.add('hidden');
+            if (protectedApp) protectedApp.classList.remove('locked');
             if (navProfile) {
                 navProfile.style.display = 'flex';
                 const lbl = document.getElementById('navAdminName');
                 if (lbl && data.user?.info?.username) lbl.innerText = data.user.info.username;
             }
+            onAuthSuccess();
             return true;
         } else {
             localStorage.removeItem('retro_admin_auth');
             if (overlay) overlay.classList.remove('hidden');
+            if (protectedApp) protectedApp.classList.add('locked');
             if (navProfile) navProfile.style.display = 'none';
             return false;
         }
     } catch (e) {
-        if (overlay) overlay.classList.add('hidden');
-        return true;
+        if (overlay) overlay.classList.remove('hidden');
+        if (protectedApp) protectedApp.classList.add('locked');
+        return false;
     }
 }
 
@@ -90,6 +162,7 @@ async function performAdminLogin() {
     const statusBox = document.getElementById('authStatusBox');
     const submitBtn = document.getElementById('btnAuthSubmit');
     const overlay = document.getElementById('authGateOverlay');
+    const protectedApp = document.getElementById('protectedApp');
     const navProfile = document.getElementById('navAdminProfile');
 
     const key = (input && input.value.trim()) || '';
@@ -104,7 +177,7 @@ async function performAdminLogin() {
 
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> KeyAuth Doğrulanıyor...';
+        submitBtn.innerHTML = '<span class="btn-content-label"><i class="fa-solid fa-spinner fa-spin"></i> KeyAuth Doğrulanıyor...</span>';
     }
     if (statusBox) statusBox.style.display = 'none';
 
@@ -129,11 +202,11 @@ async function performAdminLogin() {
 
             setTimeout(() => {
                 if (overlay) overlay.classList.add('hidden');
+                if (protectedApp) protectedApp.classList.remove('locked');
                 if (navProfile) navProfile.style.display = 'flex';
                 showToast('🔑 KeyAuth ile yetkili girişi başarılı!', 'success');
                 appendConsoleLog('YETKİLİ GİRİŞİ', `KeyAuth lisansı ile yetkili paneli açıldı.`, 'badge-accept');
-                fetchStats();
-                fetchSessions();
+                onAuthSuccess();
             }, 600);
         } else {
             playSound('alert');
@@ -153,7 +226,7 @@ async function performAdminLogin() {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Paneli Aç (Giriş Yap)';
+            submitBtn.innerHTML = '<span class="btn-glow-layer"></span><span class="btn-content-label"><i class="fa-solid fa-bolt"></i> Paneli Aç (Giriş Yap)</span>';
         }
     }
 }
@@ -189,8 +262,13 @@ async function performAdminLogout() {
 
     localStorage.removeItem('retro_admin_auth');
     currentAuthToken = null;
+    if (activeEventSource) {
+        activeEventSource.close();
+        activeEventSource = null;
+    }
 
     const overlay = document.getElementById('authGateOverlay');
+    const protectedApp = document.getElementById('protectedApp');
     const navProfile = document.getElementById('navAdminProfile');
     const input = document.getElementById('adminKeyInput');
     const statusBox = document.getElementById('authStatusBox');
@@ -198,9 +276,103 @@ async function performAdminLogout() {
     if (input) input.value = '';
     if (statusBox) statusBox.style.display = 'none';
     if (navProfile) navProfile.style.display = 'none';
+    if (protectedApp) protectedApp.classList.add('locked');
     if (overlay) overlay.classList.remove('hidden');
 
     showToast('Oturum kapatıldı.', 'info');
+}
+
+// ================= ANTI-TAMPER SENTINEL (DOM & REVERSE-ENGINEERING WATCHDOG) =================
+function initAntiTamperSentinel() {
+    const observer = new MutationObserver(() => {
+        if (currentAuthToken) return;
+
+        const overlayEl = document.getElementById('authGateOverlay');
+        const protectedEl = document.getElementById('protectedApp');
+
+        if (!overlayEl || !document.body.contains(overlayEl)) {
+            triggerTamperLock("Giriş kapısı DOM'dan silinmeye çalışıldı.");
+            return;
+        }
+
+        const style = window.getComputedStyle(overlayEl);
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0' || overlayEl.classList.contains('hidden')) {
+            triggerTamperLock("Giriş kapısı CSS ile gizlenmeye çalışıldı.");
+            return;
+        }
+
+        if (protectedEl && !protectedEl.classList.contains('locked')) {
+            triggerTamperLock("Yetkisiz panel kilidi açılmaya çalışıldı.");
+            return;
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class', 'hidden']
+    });
+
+    // Keyboard Shortcuts Interceptor
+    window.addEventListener('keydown', (e) => {
+        if (currentAuthToken) return;
+
+        if (e.key === 'F12') {
+            e.preventDefault();
+            playSound('alert');
+            showToast('⚠️ F12 Geliştirici Araçları bu ekranda engellenmiştir.', 'danger');
+            return false;
+        }
+
+        if (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) {
+            e.preventDefault();
+            playSound('alert');
+            showToast('⚠️ Geliştirici Araçları kısayolları kilitlidir.', 'danger');
+            return false;
+        }
+
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+            e.preventDefault();
+            playSound('alert');
+            return false;
+        }
+    }, true);
+
+    // Prevent context menu on login screen
+    window.addEventListener('contextmenu', (e) => {
+        if (!currentAuthToken) {
+            e.preventDefault();
+            playSound('click');
+            showToast('🛡️ Retro AC Sentinel: Sağ tık menüsü kilitlidir.', 'info');
+            return false;
+        }
+    });
+}
+
+// ================= 3D INTERACTIVE TILT FOR LOGIN CARD =================
+function initCard3DTilt() {
+    const card = document.getElementById('authGateCard');
+    const overlay = document.getElementById('authGateOverlay');
+    if (!card || !overlay) return;
+
+    overlay.addEventListener('mousemove', (e) => {
+        if (overlay.classList.contains('hidden')) return;
+        const rect = card.getBoundingClientRect();
+        const cardX = rect.left + rect.width / 2;
+        const cardY = rect.top + rect.height / 2;
+        const deltaX = (e.clientX - cardX) / (rect.width / 2);
+        const deltaY = (e.clientY - cardY) / (rect.height / 2);
+
+        const rotY = Math.max(-1, Math.min(1, deltaX)) * 7;
+        const rotX = -Math.max(-1, Math.min(1, deltaY)) * 7;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+    });
+
+    overlay.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    });
 }
 
 // ================= WEB AUDIO API FEEDBACK CHIMES =================
@@ -317,8 +489,9 @@ async function fetchStats() {
 }
 
 async function fetchSessions() {
+    if (!currentAuthToken) return;
     try {
-        const res = await fetch('/api/sessions');
+        const res = await authFetch('/api/sessions');
         allSessions = await res.json();
         renderSessionsTable(allSessions);
     } catch (e) {
@@ -337,7 +510,7 @@ async function generateQuickPin() {
     const pin = `RETRO-${Math.floor(1000 + Math.random() * 9000)}`;
 
     try {
-        const res = await fetch('/api/sessions/create', {
+        const res = await authFetch('/api/sessions/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -505,7 +678,7 @@ function filterSessionsTable() {
 async function clearAllSessions() {
     if (!confirm("Tüm denetim geçmişini temizlemek istediğinize emin misiniz?")) return;
     try {
-        await fetch('/api/sessions', { method: 'DELETE' });
+        await authFetch('/api/sessions', { method: 'DELETE' });
         showToast('🗑 Tüm denetim kayıtları temizlendi.', 'info');
         fetchStats();
         fetchSessions();
@@ -795,7 +968,7 @@ async function saveDiscordSettings() {
     const whInput = document.getElementById('txtDiscordWebhook');
     const wh = (whInput && whInput.value.trim()) || '';
     try {
-        await fetch('/api/settings/discord', {
+        await authFetch('/api/settings/discord', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ webhook: wh })
@@ -836,7 +1009,14 @@ function escapeHtml(str) {
 
 // ================= REAL-TIME EVENT STREAM (SSE) =================
 function initRealtimeEvents() {
-    const evtSource = new EventSource('/api/events');
+    if (!currentAuthToken) return;
+    if (activeEventSource) {
+        activeEventSource.close();
+        activeEventSource = null;
+    }
+
+    const evtSource = new EventSource('/api/events?token=' + encodeURIComponent(currentAuthToken));
+    activeEventSource = evtSource;
 
     evtSource.addEventListener('session_created', (e) => {
         const s = JSON.parse(e.data);
@@ -891,27 +1071,108 @@ function initRealtimeEvents() {
     });
 
     evtSource.onerror = () => {
-        // SSE auto-reconnects
+        // Auto-reconnects
     };
 }
 
-// ================= CUSTOM CURSOR & HOVER TARGETS =================
-const dot = document.getElementById('cursorDot');
-if (dot) {
-    document.addEventListener('mousemove', e => {
-        dot.style.left = e.clientX + 'px';
-        dot.style.top = e.clientY + 'px';
+// ================= CUSTOM APPLE CYBER DUAL CURSOR ENGINE =================
+function initAppleCyberCursor() {
+    const dot = document.getElementById('cursorDot');
+    const ring = document.getElementById('cursorRing');
+    if (!dot || !ring) return;
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let ringX = mouseX;
+    let ringY = mouseY;
+    let lastSparkTime = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        dot.style.left = mouseX + 'px';
+        dot.style.top = mouseY + 'px';
         dot.style.opacity = '1';
+        ring.style.opacity = '1';
+
+        // Stardust spark generator on mouse velocity
+        const now = performance.now();
+        if (now - lastSparkTime > 80) {
+            spawnCursorSpark(mouseX, mouseY);
+            lastSparkTime = now;
+        }
     });
-    document.addEventListener('mouseleave', () => dot.style.opacity = '0');
+
+    document.addEventListener('mouseleave', () => {
+        dot.style.opacity = '0';
+        ring.style.opacity = '0';
+    });
+
+    document.addEventListener('mousedown', () => {
+        ring.classList.add('clicking');
+        playSound('click');
+    });
+
+    document.addEventListener('mouseup', () => {
+        ring.classList.remove('clicking');
+    });
+
+    // Inertia spring lerp loop
+    function renderCursor() {
+        const ease = 0.18;
+        ringX += (mouseX - ringX) * ease;
+        ringY += (mouseY - ringY) * ease;
+
+        ring.style.left = ringX.toFixed(2) + 'px';
+        ring.style.top = ringY.toFixed(2) + 'px';
+
+        requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+
+    // Hover Target Listeners
+    function attachHoverTargets() {
+        document.querySelectorAll('a, button, input, .faq-q, .feature-card, .status-card, .stat-card, .switcher-btn, .ocean-table tbody tr, .pin-display-wrapper').forEach(el => {
+            if (el.dataset.cursorBound) return;
+            el.dataset.cursorBound = 'true';
+
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.addEventListener('mouseenter', () => {
+                    dot.classList.add('text-mode');
+                    ring.classList.add('text-mode');
+                });
+                el.addEventListener('mouseleave', () => {
+                    dot.classList.remove('text-mode');
+                    ring.classList.remove('text-mode');
+                });
+            } else {
+                el.addEventListener('mouseenter', () => {
+                    ring.classList.add('hover');
+                    dot.classList.add('hover');
+                });
+                el.addEventListener('mouseleave', () => {
+                    ring.classList.remove('hover');
+                    dot.classList.remove('hover');
+                });
+            }
+        });
+    }
+
+    attachHoverTargets();
+    document.addEventListener('mouseover', attachHoverTargets);
 }
 
-function refreshHoverTargets() {
-    if (!dot) return;
-    document.querySelectorAll('a, button, .faq-q, .feature-card, .status-card, .stat-card, .switcher-btn, .ocean-table tbody tr, .pin-display-wrapper').forEach(el => {
-        el.onmouseenter = () => dot.classList.add('hover');
-        el.onmouseleave = () => dot.classList.remove('hover');
-    });
+function spawnCursorSpark(x, y) {
+    if (Math.random() > 0.45) return;
+    const spark = document.createElement('div');
+    spark.className = 'cursor-spark';
+    const offsetX = (Math.random() - 0.5) * 16;
+    const offsetY = (Math.random() - 0.5) * 16;
+    spark.style.left = (x + offsetX) + 'px';
+    spark.style.top = (y + offsetY) + 'px';
+    document.body.appendChild(spark);
+    setTimeout(() => spark.remove(), 600);
 }
 
 // ================= SCROLL PROGRESS & REVEAL =================
@@ -940,13 +1201,11 @@ function bindFaqEvents() {
 // ================= INITIAL LOAD =================
 window.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    initAppleCyberCursor();
+    initCard3DTilt();
+    initAntiTamperSentinel();
     initAuth();
-    fetchStats();
-    fetchSessions();
-    initRealtimeEvents();
     bindFaqEvents();
-    refreshHoverTargets();
-    document.addEventListener('mouseover', refreshHoverTargets);
 
     window.revealObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
@@ -955,9 +1214,11 @@ window.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el => window.revealObserver.observe(el));
 
-    // Polling fallback every 6 seconds in case of network drops
+    // Polling fallback every 6 seconds ONLY if authenticated
     setInterval(() => {
-        fetchStats();
-        fetchSessions();
+        if (currentAuthToken) {
+            fetchStats();
+            fetchSessions();
+        }
     }, 6000);
 });
