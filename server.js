@@ -270,10 +270,13 @@ function getLocalIpAddresses() {
 
 // HTTP Server
 const server = http.createServer((req, res) => {
-    // CORS headers for all requests
+    // CORS & CyberShield Security headers for all requests
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
 
     if (req.method === 'OPTIONS') {
         res.writeHead(200);

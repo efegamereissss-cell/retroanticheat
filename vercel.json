@@ -13,11 +13,17 @@
   "routes": [
     {
       "src": "/download/scanner",
-      "dest": "/public/RetroAC_Scanner.exe"
+      "dest": "/public/RetroAC_Scanner.exe",
+      "headers": {
+        "Content-Disposition": "attachment; filename=\"RetroAC_Scanner.exe\""
+      }
     },
     {
       "src": "/api/download/scanner",
-      "dest": "/public/RetroAC_Scanner.exe"
+      "dest": "/public/RetroAC_Scanner.exe",
+      "headers": {
+        "Content-Disposition": "attachment; filename=\"RetroAC_Scanner.exe\""
+      }
     },
     {
       "src": "/api/(.*)",
@@ -25,7 +31,12 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/public/$1",
+      "headers": {
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "X-XSS-Protection": "1; mode=block"
+      }
     }
   ]
 }

@@ -274,10 +274,112 @@ async function performAdminLogout() {
     showToast('Oturum kapatıldı.', 'info');
 }
 
-// ================= CLIENT SECURITY WATCHDOG =================
+// ================= CLIENT SECURITY WATCHDOG (ANTI-VIEW-SOURCE & DEVTOOLS) =================
 function initAntiTamperSentinel() {
-    // Security is cleanly enforced at server-level via 401 authorization.
-    // False-positive DOM watcher removed to guarantee uninterrupted user experience.
+    let lastToastTime = 0;
+    function notifyBlocked(msg) {
+        const now = Date.now();
+        if (now - lastToastTime > 1500) {
+            lastToastTime = now;
+            playSound('alert');
+            showToast(msg, 'danger');
+        }
+    }
+
+    // 1. Block Context Menu (Right Click)
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        notifyBlocked('🔒 <strong>GÜVENLİK ENGELİ:</strong> Sayfa kaynağını görüntüleme ve sağ tık devre dışıdır!');
+        return false;
+    }, true);
+
+    // 2. Block View-Source (Ctrl+U), DevTools (F12, Ctrl+Shift+I/J/C), Save (Ctrl+S), Print (Ctrl+P)
+    window.addEventListener('keydown', (e) => {
+        // Ctrl+U or Cmd+U (View Source)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
+            e.preventDefault();
+            e.stopPropagation();
+            notifyBlocked('🚨 <strong>ERİŞİM ENGELLENDİ:</strong> Sayfa kaynağını görüntüleme (view-source / Ctrl+U) yasaktır!');
+            return false;
+        }
+
+        // F12 (DevTools)
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            e.stopPropagation();
+            notifyBlocked('🚨 <strong>ERİŞİM ENGELLENDİ:</strong> Geliştirici konsolu (F12) engellenmiştir!');
+            return false;
+        }
+
+        // Ctrl + Shift + I (Inspect) / J (Console) / C (Element Picker)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (
+            e.key === 'I' || e.key === 'i' || e.keyCode === 73 ||
+            e.key === 'J' || e.key === 'j' || e.keyCode === 74 ||
+            e.key === 'C' || e.key === 'c' || e.keyCode === 67
+        )) {
+            e.preventDefault();
+            e.stopPropagation();
+            notifyBlocked('🚨 <strong>ERİŞİM ENGELLENDİ:</strong> Sayfa öğelerini inceleme (Inspect) yasaktır!');
+            return false;
+        }
+
+        // Ctrl + S (Save Page) & Ctrl + P (Print Page)
+        if ((e.ctrlKey || e.metaKey) && (
+            e.key === 's' || e.key === 'S' || e.keyCode === 83 ||
+            e.key === 'p' || e.key === 'P' || e.keyCode === 80
+        )) {
+            e.preventDefault();
+            e.stopPropagation();
+            notifyBlocked('🔒 Sayfa kopyalama ve kaynak kaydetme engellenmiştir.');
+            return false;
+        }
+    }, true);
+
+    // 3. Selection & Drag Block (Allows form inputs)
+    document.addEventListener('dragstart', (e) => {
+        e.preventDefault();
+        return false;
+    }, true);
+
+    document.addEventListener('copy', (e) => {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+            return true; // Allow copying PIN or KeyAuth input values
+        }
+        e.preventDefault();
+        notifyBlocked('🔒 Sayfa metinleri ve kaynak kodları kopyalamaya karşı korumalıdır.');
+        return false;
+    }, true);
+
+    // 4. Active DevTools Detection (Debugger Sentry)
+    let devToolsActive = false;
+    setInterval(() => {
+        const start = performance.now();
+        (function() {}).constructor("debugger")();
+        const duration = performance.now() - start;
+        if (duration > 100) {
+            if (!devToolsActive) {
+                devToolsActive = true;
+                if (window.console) console.clear();
+                notifyBlocked('🚨 <strong>GELİŞTİRİCİ ARAÇLARI TESPİT EDİLDİ!</strong> Kaynak inceleme engellendi.');
+            }
+        } else {
+            devToolsActive = false;
+        }
+    }, 1500);
+
+    // 5. Console Protection & Warning
+    if (window.console) {
+        const noop = () => {};
+        console.log = noop;
+        console.info = noop;
+        console.debug = noop;
+        console.warn = () => {
+            console.clear();
+            console.error("%c[RETRO AC CYBERSHIELD] SAYFA KAYNAĞI VE KONSOL ERİŞİMİ ENGELLENMİŞTİR.", "color: #ef4444; font-size: 16px; font-weight: bold;");
+        };
+    }
 }
 
 // ================= 3D INTERACTIVE TILT FOR LOGIN CARD =================

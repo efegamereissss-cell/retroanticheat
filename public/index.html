@@ -1,3 +1,17 @@
+<!--
+====================================================================================================
+  ██████╗ ███████╗████████╗██████╗  ██████╗      █████╗  ██████╗
+  ██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗    ██╔══██╗██╔════╝
+  ██████╔╝█████╗     ██║   ██████╔╝██║   ██║    ███████║██║     
+  ██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║    ██╔══██║██║     
+  ██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝    ██║  ██║╚██████╗
+  ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝     ╚═╝  ╚═╝ ╚═════╝
+
+  [!] RETRO ROLEPLAY CYBERSHIELD - ADLİ KAYNAK KODU KORUMASI AKTİFTİR.
+  [!] SAYFA KAYNAĞINI GÖRÜNTÜLEME (VIEW-SOURCE), TERSİNE MÜHENDİSLİK VE İNCELEME ENGELLENMİŞTİR.
+  [!] TÜM GİRİŞİM LOGLARI VE IP İZLERİ GÜVENLİK SUNUCUSUNA AKTARILMAKTADIR.
+====================================================================================================
+-->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -5,6 +19,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title id="pageTitle">Retro Anti-Cheat — Ocean Edition • MTA:SA Adli Ekran Denetim Platformu</title>
+
+  <!-- Immediate CyberShield Protection (Blocks Ctrl+U, Right-Click, F12, DevTools) -->
+  <script>
+    (function() {
+      // 1. Right Click Block
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }, true);
+
+      // 2. View-Source & DevTools Keyboard Shortcuts
+      window.addEventListener('keydown', function(e) {
+        // Ctrl+U or Cmd+U (View Source)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        // F12 (DevTools)
+        if (e.key === 'F12' || e.keyCode === 123) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        // Ctrl+Shift+I / J / C (Inspect / Console)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (
+          e.key === 'I' || e.key === 'i' || e.keyCode === 73 ||
+          e.key === 'J' || e.key === 'j' || e.keyCode === 74 ||
+          e.key === 'C' || e.key === 'c' || e.keyCode === 67
+        )) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+        // Ctrl+S / Ctrl+P
+        if ((e.ctrlKey || e.metaKey) && (
+          e.key === 's' || e.key === 'S' || e.keyCode === 83 ||
+          e.key === 'p' || e.key === 'P' || e.keyCode === 80
+        )) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }, true);
+
+      // 3. Selection & Drag Block
+      document.addEventListener('dragstart', function(e) { e.preventDefault(); }, true);
+      document.addEventListener('selectstart', function(e) {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return true;
+        e.preventDefault();
+        return false;
+      }, true);
+    })();
+  </script>
   
   <!-- FontAwesome & Google Fonts -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
