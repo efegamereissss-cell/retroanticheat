@@ -141,12 +141,27 @@ try {
         Object.assign(sessions, loaded);
     }
 } catch (e) { }
+try {
+    const tmpFile = path.join('/tmp', 'sessions.json');
+    if (fs.existsSync(tmpFile)) {
+        const loaded = JSON.parse(fs.readFileSync(tmpFile, 'utf8'));
+        Object.assign(sessions, loaded);
+    }
+} catch (e) { }
 
 function saveSessions() {
+    let saved = false;
     try {
         fs.writeFileSync(SESSIONS_FILE, JSON.stringify(sessions, null, 2), 'utf8');
-    } catch (e) {
-        console.error('Save sessions error:', e);
+        saved = true;
+    } catch (e) { }
+    if (!saved) {
+        try {
+            const tmpFile = path.join('/tmp', 'sessions.json');
+            fs.writeFileSync(tmpFile, JSON.stringify(sessions, null, 2), 'utf8');
+        } catch (e) {
+            console.error('Save sessions error:', e);
+        }
     }
 }
 
@@ -293,7 +308,7 @@ const server = http.createServer((req, res) => {
     // POST /api/auth/login
     if (pathname === '/api/auth/login' && req.method === 'POST') {
         readJsonBody(req, body => {
-            const key = (body.key || '').trim();
+            const key = (body.key || body.licenseKey || '').trim();
             const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
             verifyLicenseKey(key, clientIp, (success, message, info) => {
                 if (success) {

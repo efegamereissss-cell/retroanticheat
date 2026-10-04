@@ -562,10 +562,10 @@ function copyCurrentPin() {
 
 function copySuspectInviteText() {
     const pin = currentPin !== 'RETRO-XXXX' ? currentPin : `RETRO-${Math.floor(1000 + Math.random() * 9000)}`;
-    const host = window.location.hostname || '127.0.0.1';
-    const port = window.location.port || '3000';
+    const origin = window.location.origin || 'https://retroanticheat.vercel.app';
+    const downloadUrl = `${origin}/download/scanner`;
 
-    const text = `🚨 [RETRO ROLEPLAY - ADLİ HİLE KONTROLÜ]\n\nYetkili ekibimiz tarafından adli ekran denetimi talep edilmiştir.\nLütfen RetroAC_Scanner.exe uygulamasını açarak aşağıdaki PIN kodunu girin ve [ACCESS] butonuna basın:\n\n👉 DENETİM KODUNUZ (PIN): ${pin}\n\nİndirme Linki: http://${host}:${port}/download/scanner\n(Kontrolden çıkmak veya reddetmek kalıcı sunucu uzaklaştırma sebebidir!)`;
+    const text = `🚨 [RETRO ROLEPLAY - ADLİ HİLE KONTROLÜ]\n\nYetkili ekibimiz tarafından bilgisayarınızda adli hile denetimi talep edilmiştir.\nLütfen aşağıdaki bağlantıdan RetroAC_Scanner.exe uygulamasını indirin, açıp Denetim PIN kodunuzu girin ve [ACCESS] butonuna basın:\n\n👉 DENETİM KODUNUZ (PIN): ${pin}\n📥 Scanner İndirme Bağlantısı: ${downloadUrl}\n\n⚡ NOT: Port açma veya ek ayar gerekmez, bulut sunucuya otomatik bağlanır!\n(Kontrolden çıkmak veya reddetmek kalıcı sunucu uzaklaştırma sebebidir!)`;
 
     navigator.clipboard.writeText(text);
     playSound('success');
@@ -574,11 +574,10 @@ function copySuspectInviteText() {
 }
 
 function updateSuspectInstructionTemplate(ip, port) {
-    const host = ip || window.location.hostname || '127.0.0.1';
-    const p = port || window.location.port || '3000';
+    const origin = window.location.origin || 'https://retroanticheat.vercel.app';
     const pre = document.getElementById('preSuspectInstructions');
     if (pre) {
-        pre.innerText = `1. Oyuncuya verilecek indirme linki: http://${host}:${p}/download/scanner\n2. Oyuncu uygulamayı açıp PIN'i girecek.\n3. ACCESS (Onayla) dediğinde tüm süreçler, makrolar ve BAM geçmişi burada canlı olarak listelenecektir!`;
+        pre.innerText = `1. Oyuncuya verilecek indirme linki: ${origin}/download/scanner\n2. Oyuncu uygulamayı açıp PIN'i girecek.\n3. ACCESS (Onayla) dediğinde tüm süreçler, makrolar ve BAM geçmişi burada canlı olarak listelenecektir!`;
     }
 }
 
