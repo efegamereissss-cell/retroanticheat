@@ -60,6 +60,8 @@ function handleUnauthorized() {
     }
 }
 
+let consecutive401Errors = 0;
+
 async function authFetch(url, options = {}) {
     const token = localStorage.getItem('retro_admin_auth');
     options.headers = options.headers || {};
@@ -69,8 +71,14 @@ async function authFetch(url, options = {}) {
     }
     const res = await fetch(url, options);
     if (res.status === 401 && !url.includes('/api/auth/')) {
-        handleUnauthorized();
+        consecutive401Errors++;
+        console.warn(`[Retro AC] 401 Unauthorized #${consecutive401Errors} on ${url}`);
+        if (consecutive401Errors >= 3) {
+            handleUnauthorized();
+        }
         throw new Error('UNAUTHORIZED');
+    } else if (res.ok) {
+        consecutive401Errors = 0;
     }
     return res;
 }
@@ -131,9 +139,12 @@ async function initAuth() {
             return false;
         }
     } catch (e) {
-        if (overlay) overlay.classList.remove('hidden');
-        if (protectedApp) protectedApp.classList.add('locked');
-        return false;
+        console.warn('[Retro AC] Ağ gecikmesi oluştu, mevcut oturum korunuyor.');
+        currentAuthToken = token;
+        if (overlay) overlay.classList.add('hidden');
+        if (protectedApp) protectedApp.classList.remove('locked');
+        onAuthSuccess();
+        return true;
     }
 }
 
