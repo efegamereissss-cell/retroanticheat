@@ -364,15 +364,26 @@ function initCard3DTilt() {
         const deltaX = (e.clientX - cardX) / (rect.width / 2);
         const deltaY = (e.clientY - cardY) / (rect.height / 2);
 
-        const rotY = Math.max(-1, Math.min(1, deltaX)) * 7;
-        const rotX = -Math.max(-1, Math.min(1, deltaY)) * 7;
+        // Smooth subtle 3D tilt for wide cockpit
+        const rotY = Math.max(-1, Math.min(1, deltaX)) * 3.5;
+        const rotX = -Math.max(-1, Math.min(1, deltaY)) * 3.5;
 
-        card.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+        card.style.transform = `perspective(1200px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.006, 1.006, 1.006)`;
     });
 
     overlay.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     });
+
+    // Update Live HUD Clock
+    function updateHudClock() {
+        const el = document.getElementById('authHudClock');
+        if (!el) return;
+        const now = new Date();
+        el.innerText = now.toTimeString().split(' ')[0];
+    }
+    setInterval(updateHudClock, 1000);
+    updateHudClock();
 }
 
 // ================= WEB AUDIO API FEEDBACK CHIMES =================

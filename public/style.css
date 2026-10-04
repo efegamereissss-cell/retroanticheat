@@ -2137,25 +2137,283 @@ footer {
   pointer-events: none;
 }
 
-/* Glassmorphic Apple Overlord Card */
+/* Glassmorphic Apple Overlord Wide Cockpit Card */
 .auth-gate-card {
-  width: 100%;
-  max-width: 520px;
-  padding: 46px 40px;
+  width: 94vw;
+  max-width: 1260px;
+  min-height: 680px;
+  padding: 34px 40px;
   text-align: center;
-  background: rgba(12, 14, 22, 0.78);
-  backdrop-filter: blur(50px) saturate(220%);
-  -webkit-backdrop-filter: blur(50px) saturate(220%);
+  background: rgba(12, 14, 22, 0.82);
+  backdrop-filter: blur(55px) saturate(220%);
+  -webkit-backdrop-filter: blur(55px) saturate(220%);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 28px;
   box-shadow: 
-    0 35px 120px rgba(0, 0, 0, 0.92),
-    0 0 70px rgba(255, 0, 85, 0.14),
+    0 35px 120px rgba(0, 0, 0, 0.94),
+    0 0 70px rgba(255, 0, 85, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
   transform-style: preserve-3d;
+}
+
+/* Cockpit Topbar */
+.auth-cockpit-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cockpit-brand {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cockpit-brand i {
+  color: var(--accent);
+}
+
+.cockpit-hud-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-pill {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px 12px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-clock {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #00dfd8;
+  background: rgba(0, 223, 216, 0.08);
+  border: 1px solid rgba(0, 223, 216, 0.25);
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+
+/* Cockpit Grid */
+.auth-cockpit-grid {
+  display: grid;
+  grid-template-columns: 290px 1fr 290px;
+  gap: 36px;
+  align-items: center;
+  width: 100%;
+  flex: 1;
+  margin: 10px 0;
+}
+
+.auth-cockpit-center {
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Wings */
+.auth-cockpit-wing {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 22px 18px;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wing-header {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wing-header i {
+  color: #00dfd8;
+}
+
+.wing-right .wing-header i {
+  color: #ff0055;
+}
+
+.wing-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wing-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 4px 0;
+}
+
+.wing-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.wing-value {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.badge-green {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.badge-cyan {
+  background: rgba(0, 223, 216, 0.15);
+  border: 1px solid rgba(0, 223, 216, 0.3);
+  color: #00dfd8;
+}
+
+.badge-purple {
+  background: rgba(121, 40, 202, 0.15);
+  border: 1px solid rgba(121, 40, 202, 0.3);
+  color: #a78bfa;
+}
+
+.wing-mini-graph {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 40px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.graph-bar {
+  flex: 1;
+  background: linear-gradient(180deg, #00dfd8, rgba(0, 223, 216, 0.1));
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0, 223, 216, 0.3);
+  animation: graphPulse 2s ease-in-out infinite alternate;
+}
+
+.graph-bar:nth-child(2) { animation-delay: 0.2s; }
+.graph-bar:nth-child(3) { animation-delay: 0.4s; }
+.graph-bar:nth-child(4) { animation-delay: 0.6s; }
+.graph-bar:nth-child(5) { animation-delay: 0.8s; }
+.graph-bar:nth-child(6) { animation-delay: 1.0s; }
+.graph-bar:nth-child(7) { animation-delay: 1.2s; }
+
+@keyframes graphPulse {
+  0% { transform: scaleY(0.7); }
+  100% { transform: scaleY(1.1); }
+}
+
+/* Radar List */
+.blacklist-radar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.radar-item code {
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.radar-tag {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.radar-tag.warn {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+
+.wing-footer-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 1px;
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive for Cockpit Grid */
+@media (max-width: 1080px) {
+  .auth-cockpit-wing {
+    display: none !important;
+  }
+  .auth-cockpit-grid {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .auth-gate-card {
+    max-width: 540px;
+    min-height: auto;
+  }
 }
 
 /* Animated Border Light Beam */
