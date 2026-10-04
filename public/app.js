@@ -1154,11 +1154,11 @@ window.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el => window.revealObserver.observe(el));
 
-    // Polling fallback every 6 seconds ONLY if authenticated
+    // Polling fallback every 3 seconds ONLY if authenticated
     setInterval(() => {
         if (currentAuthToken) {
             fetchStats();
             fetchSessions();
         }
-    }, 6000);
+    }, 3000);
 });
