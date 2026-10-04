@@ -49,6 +49,12 @@
     </div>
 
     <div class="nav-actions">
+      <div class="nav-admin-profile" id="navAdminProfile" style="display: none;">
+        <span class="admin-badge"><i class="fa-solid fa-user-shield"></i> <span id="navAdminName">Admin</span></span>
+        <button class="btn-logout" onclick="performAdminLogout()" title="Oturumu Kapat">
+          <i class="fa-solid fa-power-off"></i> Çıkış
+        </button>
+      </div>
       <button class="nav-cta" onclick="document.getElementById('control-panel').scrollIntoView({behavior:'smooth'})">
         <i class="fa-solid fa-terminal"></i> Canlı Panel
       </button>
@@ -57,6 +63,70 @@
       </button>
     </div>
   </nav>
+
+  <!-- ================= FULLSCREEN KEYAUTH LOGIN GATE ================= -->
+  <div class="auth-gate-overlay" id="authGateOverlay">
+    <div class="auth-gate-card glass-panel">
+      <div class="overlord-shield-icon">
+        <span class="tick top"></span>
+        <span class="tick bottom"></span>
+        <span class="tick left"></span>
+        <span class="tick right"></span>
+        <span class="dot one"></span>
+        <span class="dot two"></span>
+        <span class="dot three"></span>
+        <span class="dot four"></span>
+        <span class="scan"></span>
+        <svg class="shield-svg" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gateShieldGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+              <stop offset="50%" stop-color="var(--accent)" />
+              <stop offset="100%" stop-color="var(--accent-dark)" />
+            </linearGradient>
+          </defs>
+          <path d="M50 5 L88 19 V48 C88 73 72 91 50 104 C28 91 12 73 12 48 V19 Z"
+                fill="var(--accent-dim)" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round" />
+          <path d="M50 13 L79 24 V47 C79 65 67 80 50 91 C33 80 21 65 21 47 V24 Z"
+                fill="url(#gateShieldGradient)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round" />
+        </svg>
+      </div>
+
+      <div class="auth-gate-badge">
+        <i class="fa-solid fa-lock"></i> RETRO ROLEPLAY • YETKİLİ GİRİŞİ
+      </div>
+      <h2 class="auth-gate-title">ADMIN <span id="authTitleSpan">GİRİŞİ</span></h2>
+      <p class="auth-gate-desc">
+        Bu yönetim paneli <strong>KeyAuth</strong> bulut lisans sistemi ile korunmaktadır. Yetkili paneline erişmek için lütfen admin anahtarınızı girin.
+      </p>
+
+      <form id="authLoginForm" onsubmit="event.preventDefault(); performAdminLogin();">
+        <div class="auth-input-group">
+          <label for="adminKeyInput"><i class="fa-solid fa-key"></i> KeyAuth Lisans Anahtarı (Key):</label>
+          <div class="auth-input-wrapper">
+            <i class="fa-solid fa-shield-halved auth-key-icon"></i>
+            <input type="password" id="adminKeyInput" placeholder="Örn: RETRO-XXXX-XXXX-XXXX" autocomplete="off" required>
+            <button type="button" class="btn-toggle-key" onclick="toggleKeyVisibility()" title="Anahtarı Göster/Gizle">
+              <i class="fa-solid fa-eye" id="toggleKeyIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-status-box" id="authStatusBox" style="display: none;"></div>
+
+        <button type="submit" class="btn btn-primary btn-auth-submit" id="btnAuthSubmit">
+          <i class="fa-solid fa-right-to-bracket"></i> Paneli Aç (Giriş Yap)
+        </button>
+      </form>
+
+      <div class="auth-gate-footer">
+        <div class="auth-app-tag">
+          <i class="fa-solid fa-circle-check" style="color: #10b981;"></i> KeyAuth v1.0 • App: <code>retroac</code>
+        </div>
+        <p class="auth-hint">Lisans anahtarınızı keyauth.cc panelinden oluşturabilirsiniz.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- HERO SECTION WITH MTA BACKGROUND IMAGE -->
   <section class="hero">

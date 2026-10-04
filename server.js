@@ -1,4 +1,6 @@
 const http = require('http');
+const https = require('https');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -12,12 +14,87 @@ const CONFIG_FILE = isVercel ? path.join('/tmp', 'config.json') : path.join(__di
 global._retroSessions = global._retroSessions || {};
 let sessions = global._retroSessions;
 
+// Auth session tokens
+global._retroAuthTokens = global._retroAuthTokens || {};
+let authTokens = global._retroAuthTokens;
+
 let config = {
     discordWebhook: '',
     serverName: 'Retro Roleplay AC',
     port: PORT
 };
 let sseClients = [];
+
+// ================= KEYAUTH LICENSE VERIFICATION =================
+function callKeyAuth(postData, callback) {
+    const req = https.request('https://keyauth.win/api/1.2/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': Buffer.byteLength(postData),
+            'User-Agent': 'KeyAuth-NodeJS'
+        }
+    }, res => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+            try {
+                const json = JSON.parse(body);
+                callback(null, json);
+            } catch (e) {
+                callback(e, null);
+            }
+        });
+    });
+
+    req.on('error', err => callback(err, null));
+    req.write(postData);
+    req.end();
+}
+
+function verifyLicenseKey(licenseKey, clientIp, callback) {
+    if (!licenseKey || typeof licenseKey !== 'string') {
+        return callback(false, "Lütfen bir lisans anahtarı girin.");
+    }
+    const cleanKey = licenseKey.trim();
+
+    // Master key bypass (backup for owner)
+    if (cleanKey === 'retro_master_2026' || cleanKey === 'retroadmin') {
+        return callback(true, "Master Anahtar ile Giriş Yapıldı", { key: cleanKey, plan: "Owner / Full Access" });
+    }
+
+    const appName = "retroac";
+    const ownerId = "2T6QmVtm9P";
+    const version = "1.0";
+
+    const initParams = `type=init&name=${encodeURIComponent(appName)}&ownerid=${encodeURIComponent(ownerId)}&version=${encodeURIComponent(version)}`;
+
+    callKeyAuth(initParams, (err, initData) => {
+        if (err || !initData) {
+            return callback(false, "KeyAuth sunucusuna bağlanılamadı. Lütfen internetinizi kontrol edin.");
+        }
+        if (!initData.success || !initData.sessionid) {
+            return callback(false, initData.message || "KeyAuth uygulaması başlatılamadı.");
+        }
+
+        const sessionId = initData.sessionid;
+        // KeyAuth requires HWID to be >= 20 characters
+        const hwid = crypto.createHash('sha256').update(`retroac_${cleanKey}_${clientIp || 'browser'}`).digest('hex');
+
+        const licenseParams = `type=license&key=${encodeURIComponent(cleanKey)}&sessionid=${encodeURIComponent(sessionId)}&name=${encodeURIComponent(appName)}&ownerid=${encodeURIComponent(ownerId)}&hwid=${encodeURIComponent(hwid)}`;
+
+        callKeyAuth(licenseParams, (err2, licData) => {
+            if (err2 || !licData) {
+                return callback(false, "KeyAuth doğrulaması sırasında bağlantı koptu.");
+            }
+            if (licData.success) {
+                return callback(true, licData.message || "Giriş Başarılı!", licData.info || {});
+            } else {
+                return callback(false, licData.message || "Geçersiz Lisans Anahtarı!");
+            }
+        });
+    });
+}
 
 // Load config
 try {
@@ -179,6 +256,54 @@ const server = http.createServer((req, res) => {
 
     // ================= API ENDPOINTS =================
     
+    // POST /api/auth/login
+    if (pathname === '/api/auth/login' && req.method === 'POST') {
+        readJsonBody(req, body => {
+            const key = (body.key || '').trim();
+            const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+            verifyLicenseKey(key, clientIp, (success, message, info) => {
+                if (success) {
+                    const token = 'retro_auth_' + crypto.randomBytes(16).toString('hex');
+                    authTokens[token] = {
+                        key: key,
+                        info: info,
+                        createdAt: Date.now()
+                    };
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: true, token, message, info }));
+                } else {
+                    res.writeHead(401, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ success: false, message }));
+                }
+            });
+        });
+        return;
+    }
+
+    // POST /api/auth/verify
+    if (pathname === '/api/auth/verify' && req.method === 'POST') {
+        readJsonBody(req, body => {
+            const token = body.token;
+            if (token && authTokens[token]) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ valid: true, user: authTokens[token] }));
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ valid: false }));
+        });
+        return;
+    }
+
+    // POST /api/auth/logout
+    if (pathname === '/api/auth/logout' && req.method === 'POST') {
+        readJsonBody(req, body => {
+            if (body.token) delete authTokens[body.token];
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: true }));
+        });
+        return;
+    }
+
     // GET /api/stats
     if (pathname === '/api/stats' && req.method === 'GET') {
         let total = 0, banned = 0, clean = 0, declined = 0;

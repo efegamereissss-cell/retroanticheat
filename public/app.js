@@ -34,6 +34,175 @@ function initTheme() {
     switchTheme(saved);
 }
 
+// ================= KEYAUTH ADMIN AUTHENTICATION =================
+let currentAuthToken = null;
+
+async function initAuth() {
+    const input = document.getElementById('adminKeyInput');
+    if (input && !input.dataset.bound) {
+        input.dataset.bound = 'true';
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') performAdminLogin();
+        });
+    }
+
+    const token = localStorage.getItem('retro_admin_auth');
+    const overlay = document.getElementById('authGateOverlay');
+    const navProfile = document.getElementById('navAdminProfile');
+
+    if (!token) {
+        if (overlay) overlay.classList.remove('hidden');
+        if (navProfile) navProfile.style.display = 'none';
+        return false;
+    }
+
+    try {
+        const res = await fetch('/api/auth/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if (data.valid) {
+            currentAuthToken = token;
+            if (overlay) overlay.classList.add('hidden');
+            if (navProfile) {
+                navProfile.style.display = 'flex';
+                const lbl = document.getElementById('navAdminName');
+                if (lbl && data.user?.info?.username) lbl.innerText = data.user.info.username;
+            }
+            return true;
+        } else {
+            localStorage.removeItem('retro_admin_auth');
+            if (overlay) overlay.classList.remove('hidden');
+            if (navProfile) navProfile.style.display = 'none';
+            return false;
+        }
+    } catch (e) {
+        if (overlay) overlay.classList.add('hidden');
+        return true;
+    }
+}
+
+async function performAdminLogin() {
+    playSound('click');
+    const input = document.getElementById('adminKeyInput');
+    const statusBox = document.getElementById('authStatusBox');
+    const submitBtn = document.getElementById('btnAuthSubmit');
+    const overlay = document.getElementById('authGateOverlay');
+    const navProfile = document.getElementById('navAdminProfile');
+
+    const key = (input && input.value.trim()) || '';
+    if (!key) {
+        if (statusBox) {
+            statusBox.className = 'auth-status-box error';
+            statusBox.style.display = 'block';
+            statusBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Lütfen KeyAuth lisans anahtarınızı girin!';
+        }
+        return;
+    }
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> KeyAuth Doğrulanıyor...';
+    }
+    if (statusBox) statusBox.style.display = 'none';
+
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            playSound('success');
+            currentAuthToken = data.token;
+            localStorage.setItem('retro_admin_auth', data.token);
+
+            if (statusBox) {
+                statusBox.className = 'auth-status-box success';
+                statusBox.style.display = 'block';
+                statusBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Lisans Doğrulandı! Yönetim Paneli Açılıyor...';
+            }
+
+            setTimeout(() => {
+                if (overlay) overlay.classList.add('hidden');
+                if (navProfile) navProfile.style.display = 'flex';
+                showToast('🔑 KeyAuth ile yetkili girişi başarılı!', 'success');
+                appendConsoleLog('YETKİLİ GİRİŞİ', `KeyAuth lisansı ile yetkili paneli açıldı.`, 'badge-accept');
+                fetchStats();
+                fetchSessions();
+            }, 600);
+        } else {
+            playSound('alert');
+            if (statusBox) {
+                statusBox.className = 'auth-status-box error';
+                statusBox.style.display = 'block';
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${escapeHtml(data.message || 'Geçersiz Lisans Anahtarı!')}`;
+            }
+        }
+    } catch (e) {
+        playSound('alert');
+        if (statusBox) {
+            statusBox.className = 'auth-status-box error';
+            statusBox.style.display = 'block';
+            statusBox.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Sunucuyla iletişim kurulamadı!';
+        }
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Paneli Aç (Giriş Yap)';
+        }
+    }
+}
+
+function toggleKeyVisibility() {
+    const input = document.getElementById('adminKeyInput');
+    const icon = document.getElementById('toggleKeyIcon');
+    if (!input || !icon) return;
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+    }
+}
+
+async function performAdminLogout() {
+    if (!confirm('Yetkili oturumunu kapatmak istediğinize emin misiniz?')) return;
+    playSound('click');
+
+    const token = localStorage.getItem('retro_admin_auth');
+    if (token) {
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token })
+            });
+        } catch (e) { }
+    }
+
+    localStorage.removeItem('retro_admin_auth');
+    currentAuthToken = null;
+
+    const overlay = document.getElementById('authGateOverlay');
+    const navProfile = document.getElementById('navAdminProfile');
+    const input = document.getElementById('adminKeyInput');
+    const statusBox = document.getElementById('authStatusBox');
+
+    if (input) input.value = '';
+    if (statusBox) statusBox.style.display = 'none';
+    if (navProfile) navProfile.style.display = 'none';
+    if (overlay) overlay.classList.remove('hidden');
+
+    showToast('Oturum kapatıldı.', 'info');
+}
+
 // ================= WEB AUDIO API FEEDBACK CHIMES =================
 let audioCtx = null;
 function getAudioContext() {
@@ -771,6 +940,7 @@ function bindFaqEvents() {
 // ================= INITIAL LOAD =================
 window.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    initAuth();
     fetchStats();
     fetchSessions();
     initRealtimeEvents();
