@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title id="pageTitle">Retro Anti-Cheat — Ocean Edition • MTA:SA Adli Ekran Denetim Platformu</title>
+  
+  <!-- FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="crimson-theme">
+  <!-- Scroll Progress & Neon Custom Cursor -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <!-- FLOATING NAVBAR -->
+  <nav id="nav">
+    <div class="nav-left">
+      <a href="#" class="nav-logo">
+        <i class="fa-solid fa-shield-halved"></i> RETRO <span id="navLogoSpan">AC</span>
+        <span class="nav-logo-badge" id="navGameBadge">OCEAN ED.</span>
+      </a>
+
+      <!-- Theme / Accent Switcher Pill -->
+      <div class="game-switcher-pill">
+        <button class="switcher-btn active crimson-btn" id="btnSwitchCrimson" onclick="switchTheme('crimson')">
+          <i class="fa-solid fa-fire"></i> <span>Crimson Red</span>
+        </button>
+        <button class="switcher-btn purple-btn" id="btnSwitchPurple" onclick="switchTheme('purple')">
+          <i class="fa-solid fa-bolt"></i> <span>Apple Violet</span>
+        </button>
+        <button class="switcher-btn cyan-btn" id="btnSwitchCyan" onclick="switchTheme('cyan')">
+          <i class="fa-solid fa-crosshairs"></i> <span>Cyber Cyan</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="nav-links" id="navLinks">
+      <a href="#control-panel">Yönetim Paneli</a>
+      <a href="#features">Adli Motor</a>
+      <a href="#status">Sistem Durumu</a>
+      <a href="#blacklist">Kara Liste</a>
+      <a href="#faq">SSS</a>
+    </div>
+
+    <div class="nav-actions">
+      <button class="nav-cta" onclick="document.getElementById('control-panel').scrollIntoView({behavior:'smooth'})">
+        <i class="fa-solid fa-terminal"></i> Canlı Panel
+      </button>
+      <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION WITH MTA BACKGROUND IMAGE -->
+  <section class="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content reveal">
+      <div class="hero-badge" id="heroBadge">
+        <i class="fa-solid fa-shield-virus"></i> RETRO ROLEPLAY • OCEAN EDITION ANTI-CHEAT
+      </div>
+      <h1 id="heroTitle">RETRO<br><span>ANTICHEAT</span></h1>
+      <p class="hero-sub" id="heroSub">MTA:SA 1.6 Adli Ekran Denetimi • Kara Liste Radarı • Canlı Web Konsolu</p>
+      <p class="hero-desc" id="heroDesc">
+        Sunucunuzu hilecilerden, gizlenmiş enjektörlerden ve makrolardan arındırın. Oyuncular tek tıkla onaylar; çalışan süreçler, silinmiş BAM kayıtları, DLL modülleri ve Prefetch anında ekrana düşer.
+      </p>
+
+      <div class="hero-btns">
+        <button class="btn btn-primary" onclick="document.getElementById('control-panel').scrollIntoView({behavior:'smooth'})">
+          <i class="fa-solid fa-gamepad"></i> Denetim Konsolunu Aç
+        </button>
+        <button class="btn btn-secondary" onclick="openDownloadModal()">
+          <i class="fa-solid fa-download"></i> İstemciyi İndir (.exe)
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-scroll">AŞAĞI KAYDIR</div>
+  </section>
+
+  <div class="glitch-divider"></div>
+
+  <!-- ================= CONTROL PANEL SECTION ================= -->
+  <section id="control-panel" class="panel-section">
+    <div class="section-header reveal">
+      <p class="section-sub">CANLI ADLİ YÖNETİM MERKEZİ</p>
+      <h2 class="section-title">HİLE KONTROL <span id="panelTitleSpan">KONSOLU</span></h2>
+      <p class="section-desc">Oyuncular için anında PIN kodu oluşturun, canlı bağlantıları ve adli tarama sonuçlarını tek ekrandan yönetin.</p>
+    </div>
+
+    <!-- QUICK PIN GENERATOR CARD (OVERLORD STYLE) -->
+    <div class="quick-pin-card glass-panel reveal">
+      <div class="pin-card-left">
+        <button class="btn btn-primary pulse-btn" onclick="generateQuickPin()">
+          <i class="fa-solid fa-dice"></i> TEK TIKLA PIN OLUŞTUR
+        </button>
+        <div class="pin-display-wrapper" onclick="copyCurrentPin()" title="Tıklayarak Kopyala">
+          <span class="pin-prefix">PIN:</span>
+          <span id="lblCurrentPin" class="pin-code">RETRO-XXXX</span>
+          <span class="copy-badge"><i class="fa-solid fa-copy"></i> Kopyala</span>
+        </div>
+      </div>
+
+      <div class="pin-card-middle">
+        <div class="input-group">
+          <label for="txtSuspectName"><i class="fa-solid fa-user-ninja"></i> Şüpheli Oyuncu / ID:</label>
+          <input type="text" id="txtSuspectName" placeholder="Örn: Ahmet_Yilmaz veya ID #42" value="Şüpheli">
+        </div>
+        <div class="input-group">
+          <label for="txtAdminName"><i class="fa-solid fa-user-shield"></i> Sorumlu Yetkili:</label>
+          <input type="text" id="txtAdminName" placeholder="Admin" value="Admin">
+        </div>
+      </div>
+
+      <div class="pin-card-right">
+        <button class="btn btn-accent" onclick="copySuspectInviteText()">
+          <i class="fa-solid fa-share-from-square"></i> Şüpheliye Gönderim Metnini Kopyala
+        </button>
+        <span class="helper-hint"><i class="fa-solid fa-circle-info"></i> Oyuncuya bu metni atın; onaylayınca tarama canlı başlar!</span>
+      </div>
+    </div>
+
+    <!-- STATS GRID (APPLE/OVERLORD HYBRID) -->
+    <div class="stats-grid reveal">
+      <div class="stat-card glass-panel" style="--accent-color: var(--accent);">
+        <div class="stat-icon-wrapper"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="stat-content">
+          <div class="stat-label">TOPLAM DENETİM</div>
+          <div class="stat-value" id="valTotalScans">0</div>
+          <div class="stat-trend">Gerçekleştirilen Kontroller</div>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel" style="--accent-color: #ef4444;">
+        <div class="stat-icon-wrapper red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="stat-content">
+          <div class="stat-label">HİLE & KARA LİSTE TESPİTİ</div>
+          <div class="stat-value red" id="valBannedScans">0</div>
+          <div class="stat-trend red">Nexida, Lnix, Stork, AHK vb.</div>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel" style="--accent-color: #10b981;">
+        <div class="stat-icon-wrapper green"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-content">
+          <div class="stat-label">TEMİZ OYUNCULAR</div>
+          <div class="stat-value green" id="valCleanScans">0</div>
+          <div class="stat-trend green">Şüphe Bulunmayanlar</div>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel" style="--accent-color: #f59e0b;">
+        <div class="stat-icon-wrapper amber"><i class="fa-solid fa-ban"></i></div>
+        <div class="stat-content">
+          <div class="stat-label">REDDEDEN / KAÇAN</div>
+          <div class="stat-value amber" id="valDeclinedScans">0</div>
+          <div class="stat-trend amber">Kontrolden Kaçan Şüpheliler</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN SESSIONS TABLE & CYBER LOGS -->
+    <div class="workspace-grid reveal">
+      <!-- SESSIONS DATA TABLE -->
+      <div class="table-section glass-panel">
+        <div class="section-header-compact">
+          <div class="section-title-wrap">
+            <h3 class="section-title-sm"><i class="fa-solid fa-bolt"></i> AKTİF VE GEÇMİŞ DENETİMLER LİSTESİ</h3>
+            <span class="section-hint">💡 Detaylı adli rapor için oyuncunun satırına tıklayın</span>
+          </div>
+          <div class="section-tools">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="tableSearchInput" placeholder="Oyuncu adı, PIN veya durum ara..." oninput="filterSessionsTable()">
+            </div>
+            <button class="btn btn-danger-soft" onclick="clearAllSessions()">
+              <i class="fa-solid fa-trash-can"></i> Temizle
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="ocean-table" id="sessionsTable">
+            <thead>
+              <tr>
+                <th>TOKEN (PIN)</th>
+                <th>ŞÜPHELİ OYUNCU & BİLGİSAYAR</th>
+                <th>YETKİLİ</th>
+                <th>CANLI DURUM</th>
+                <th>RİSK SKORU</th>
+                <th>TARAMA ZAMANI</th>
+                <th style="text-align: right;">İŞLEMLER</th>
+              </tr>
+            </thead>
+            <tbody id="sessionsTableBody">
+              <tr class="empty-row">
+                <td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="empty-text">Henüz denetim kaydı bulunmuyor.</div>
+                    <div class="empty-sub">Yukarıdaki "TEK TIKLA PIN OLUŞTUR" butonuyla yeni bir hile denetimi başlatın.</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CYBER ACTIVITY FEED -->
+      <div class="console-section glass-panel">
+        <div class="console-header">
+          <div class="console-title">
+            <span class="live-dot"></span>
+            <span><i class="fa-solid fa-satellite-dish"></i> CANLI OLAY VE ŞÜPHELİ HAREKET LOGLARI:</span>
+          </div>
+          <button class="btn-text" onclick="clearConsoleLogs()"><i class="fa-solid fa-broom"></i> Temizle</button>
+        </div>
+        <div class="console-body" id="consoleLogs">
+          <div class="log-line">
+            <span class="log-time">[00:00:00]</span>
+            <span class="log-badge badge-sys">[SİSTEM]</span>
+            <span class="log-text">Retro Roleplay Anti-Cheat Web Platformu (Ocean Edition) aktif ve hazır.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="glitch-divider"></div>
+
+  <!-- ================= FEATURES SECTION (OVERLORD STYLE CARDS) ================= -->
+  <section id="features">
+    <div class="section-header reveal">
+      <p class="section-sub">ADLİ TEKNOLOJİ</p>
+      <h2 class="section-title">GELİŞMİŞ <span id="featTitleSpan">DENETİM MOTORU</span></h2>
+      <p class="section-desc">Retro Anti-Cheat, en karmaşık gizleme ve enjeksiyon tekniklerini saniyeler içinde açığa çıkarır.</p>
+    </div>
+
+    <div class="features-grid" id="featuresGrid">
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon"><i class="fa-solid fa-skull-crossbones"></i></div>
+        <h3>Kara Liste İmzaları</h3>
+        <p>Nexida.exe, Lnix, Stork, JusticeScales ve bilinen tüm MTA hilelerini süreç, PE başlığı ve hafızadan yakalar.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <h3>Windows BAM Adli Geçmiş</h3>
+        <p>Kullanıcı hileyi kontrol öncesinde silmiş veya gizlemiş olsa bile, Windows BAM kayıt defterindeki yürütme damgasını tespit eder.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon"><i class="fa-solid fa-keyboard"></i></div>
+        <h3>Makro & AHK Radarı</h3>
+        <p>AutoHotkey, TinyTask, OP AutoClicker, No-Recoil scriptleri ve masaüstündeki açık makro pencerelerini saniyede tarar.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-4">
+        <div class="feature-icon"><i class="fa-solid fa-syringe"></i></div>
+        <h3>DLL & Bellek Kancaları</h3>
+        <p>MTA:SA ve GTA San Andreas kök dizini, CLEO scriptleri, ASI kütüphaneleri ve bellek enjeksiyonlarını denetler.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon"><i class="fa-solid fa-fingerprint"></i></div>
+        <h3>Prefetch & Temp Taraması</h3>
+        <p>Windows Prefetch önbelleği, İndirilenler, Masaüstü ve Temp dizinlerindeki şüpheli arşivleri ve çalıştırılma izlerini inceler.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon"><i class="fa-solid fa-network-wired"></i></div>
+        <h3>DNS Önbellek Analizi</h3>
+        <p>Sistem DNS çözümleme önbelleğini sorgulayarak bilinen hile forumları veya dağıtım adreslerine yapılan sorguları yakalar.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="glitch-divider"></div>
+
+  <!-- ================= STATUS GRID SECTION ================= -->
+  <section id="status">
+    <div class="section-header reveal">
+      <p class="section-sub">DURUM</p>
+      <h2 class="section-title">SİSTEM <span id="statusTitleSpan">DURUMU</span></h2>
+      <p class="section-desc">Tüm anti-cheat modülleri ve adli tarama servisleri 7/24 aktif olarak çalışmaktadır.</p>
+    </div>
+
+    <div class="status-grid reveal">
+      <div class="status-card">
+        <span class="status-name"><i class="fa-solid fa-shield"></i> MTA:SA 1.6 Koruma Modülü</span>
+        <span class="status-badge status-ud"><span class="status-ud-dot"></span> AKTİF</span>
+      </div>
+      <div class="status-card">
+        <span class="status-name"><i class="fa-solid fa-database"></i> Kara Liste Veritabanı (Nexida, Lnix vb.)</span>
+        <span class="status-badge status-ud"><span class="status-ud-dot"></span> KORUMALI</span>
+      </div>
+      <div class="status-card">
+        <span class="status-name"><i class="fa-solid fa-microchip"></i> Windows BAM Adli Analizörü</span>
+        <span class="status-badge status-ud"><span class="status-ud-dot"></span> AKTİF</span>
+      </div>
+      <div class="status-card">
+        <span class="status-name"><i class="fa-solid fa-gamepad"></i> Makro & Oto-Tıklayıcı Radarı</span>
+        <span class="status-badge status-ud"><span class="status-ud-dot"></span> AKTİF</span>
+      </div>
+      <div class="status-card">
+        <span class="status-name"><i class="fa-solid fa-wifi"></i> Canlı Web Soketi / SSE Yayını</span>
+        <span class="status-badge status-ud"><span class="status-ud-dot"></span> BAĞLI</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="glitch-divider"></div>
+
+  <!-- ================= BLACKLIST SECTION ================= -->
+  <section id="blacklist">
+    <div class="section-header reveal">
+      <p class="section-sub">KARA LİSTE</p>
+      <h2 class="section-title">HEDEF <span id="blTitleSpan">HİLE YAZILIMLARI</span></h2>
+      <p class="section-desc">Retro Anti-Cheat motoru, bu hilelerin sistemde açık olmasını, indirilmesini veya geçmişte çalıştırılmış izlerini anında %100 riskle damgalar:</p>
+    </div>
+
+    <div class="blacklist-tags-center reveal">
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> Nexida.exe (Özel MTA Hilesi)</span>
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> justicescales.exe (Özel MTA Hilesi)</span>
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> storksoftware.exe (Özel MTA Hilesi)</span>
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> lnixsoftware.exe (Lnix Client)</span>
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> lnix.exe (Lnix Client)</span>
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> mtasacheat.exe (MTA Cheat)</span>
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> cheatmta.exe (Cheat MTA)</span>
+      <span class="bl-tag red"><i class="fa-solid fa-skull"></i> mtasancheat.exe (MTA San Cheat)</span>
+      <span class="bl-tag amber"><i class="fa-solid fa-bolt"></i> AutoHotkey.exe (Makro / Sekmeme)</span>
+      <span class="bl-tag amber"><i class="fa-solid fa-bolt"></i> TinyTask.exe (Makro Kaydedici)</span>
+      <span class="bl-tag amber"><i class="fa-solid fa-bolt"></i> OPAutoClicker.exe (Hızlı Ateş)</span>
+      <span class="bl-tag purple"><i class="fa-solid fa-syringe"></i> Extreme Injector & Xenos (DLL Injector)</span>
+    </div>
+  </section>
+
+  <div class="glitch-divider"></div>
+
+  <!-- ================= FAQ SECTION ================= -->
+  <section id="faq">
+    <div class="section-header reveal">
+      <p class="section-sub">SSS</p>
+      <h2 class="section-title">SIKÇA <span id="faqTitleSpan">SORULANLAR</span></h2>
+      <p class="section-desc">Retro Anti-Cheat sistemi hakkında merak ettiğiniz her şey.</p>
+    </div>
+
+    <div class="faq-grid reveal">
+      <div class="faq-item active">
+        <div class="faq-q">
+          <h3>Retro Roleplay Anti-Cheat nasıl çalışır?</h3>
+          <i class="fa-solid fa-plus"></i>
+        </div>
+        <div class="faq-a">
+          Yetkili panelden tek tıkla 4 haneli PIN üretir. Şüpheli oyuncu <strong>RetroAC_Scanner.exe</strong> uygulamasını açıp bu PIN kodunu girer ve ACCESS butonuna basar. Yaklaşık 3.8 saniyelik derin adli analiz motoru; çalışan süreçleri, açık makro pencerelerini, oyun DLL modüllerini, Windows BAM silinmiş program geçmişini ve Prefetch önbelleğini tarayarak raporu anında bu web paneline iletir.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <h3>Oyuncu kontrol öncesi hileyi silerse yakalanır mı?</h3>
+          <i class="fa-solid fa-plus"></i>
+        </div>
+        <div class="faq-a">
+          Kesinlikle evet! Windows BAM (Background Activity Moderator) ve Prefetch mekanizmaları sayesinde, oyuncu hile dosyasını veya klasörünü silmiş olsa dahi Windows kayıt defterinde saklanan adli çalıştırma damgaları ve zaman kayıtları tespit edilir.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <h3>Makro ve Sekmeme araçları nasıl tespit edilir?</h3>
+          <i class="fa-solid fa-plus"></i>
+        </div>
+        <div class="faq-a">
+          Sistem; AutoHotkey, TinyTask, OP AutoClicker gibi süreçleri listelemekle kalmaz, oyuncu dosya adını svchost veya discord yapsa dahi Win32 pencere başlığı taramasıyla gizlenmiş makroları bulur. Ayrıca Downloads ve Masaüstündeki .ahk dosyalarının kodlarını inceleyerek seri tıklama döngülerini yakalar.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <h3>Web paneline farklı bilgisayarlardan nasıl bağlanılır?</h3>
+          <i class="fa-solid fa-plus"></i>
+        </div>
+        <div class="faq-a">
+          Sunucu 0.0.0.0:3000 üzerinden dinler. Yerel ağınızdaki cihazlardan <code>http://[SİZİN-IP]:3000</code> adresiyle erişebilirsiniz. İnternet üzerinden uzaktaki oyuncuları taramak için port açabilir veya ücretsiz <code>ngrok http 3000</code> / Cloudflare Tunnel kullanarak herkese açık güvenli bir link oluşturabilirsiniz.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="footer-logo">RETRO <span id="footerLogoSpan">ANTICHEAT</span></div>
+    <p class="footer-tagline">© 2026 Retro Roleplay — Ocean Edition MTA:SA Adli Ekran Denetim Platformu</p>
+    <div class="footer-social">
+      <a href="#" aria-label="Discord" onclick="openDiscordModal()"><i class="fa-brands fa-discord"></i></a>
+      <a href="#" aria-label="Download" onclick="openDownloadModal()"><i class="fa-solid fa-download"></i></a>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL: DETAILED FORENSIC INSPECT ================= -->
+  <div class="modal-overlay" id="inspectModal">
+    <div class="modal-dialog glass-panel inspect-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-badge">ADLİ SİSTEM RAPORU</div>
+          <h2 id="modalSuspectName" class="modal-title">Şüpheli Oyuncu İncelemesi</h2>
+          <div id="modalSuspectSub" class="modal-subtitle">Token: RETRO-XXXX • Host: PC • IP: 127.0.0.1</div>
+        </div>
+
+        <div class="modal-risk-badge" id="modalRiskBadge">
+          <div class="risk-number" id="modalRiskNumber">%0</div>
+          <div class="risk-label" id="modalRiskLabel">TEMİZ</div>
+        </div>
+
+        <button class="modal-close" onclick="closeInspectModal()">✕</button>
+      </div>
+
+      <div class="modal-telemetry-bar">
+        <div class="telem-item">
+          <span class="telem-label">MTA / GTA:</span>
+          <span class="telem-val" id="telemMtaStatus">-</span>
+        </div>
+        <div class="telem-item">
+          <span class="telem-label">İşletim Sistemi:</span>
+          <span class="telem-val" id="telemOs">-</span>
+        </div>
+        <div class="telem-item">
+          <span class="telem-label">RAM:</span>
+          <span class="telem-val" id="telemRam">-</span>
+        </div>
+        <div class="telem-item">
+          <span class="telem-label">Süre:</span>
+          <span class="telem-val" id="telemDuration">-</span>
+        </div>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="tab-btn active" onclick="switchModalTab('tabDetections')">
+          🚨 Tehditler & Kara Liste (<span id="countDetections">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchModalTab('tabMacros')">
+          ⌨️ Makro & Otomasyon (<span id="countMacros">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchModalTab('tabBam')">
+          ⚡ Silinmiş Hile Kayıtları (BAM) (<span id="countBam">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchModalTab('tabDlls')">
+          💉 Oyun DLL Modülleri (<span id="countDlls">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchModalTab('tabProcs')">
+          💻 Çalışan Süreçler (<span id="countProcs">0</span>)
+        </button>
+      </div>
+
+      <!-- Tab 1: Detections -->
+      <div class="tab-pane active" id="tabDetections">
+        <div class="table-responsive modal-table-wrap">
+          <table class="ocean-table modal-table">
+            <thead>
+              <tr>
+                <th>TEHDİT SEVİYESİ</th>
+                <th>KATEGORİ</th>
+                <th>BULGU BAŞLIĞI VE ADLİ AÇIKLAMA</th>
+                <th>DOSYA YOLU / İZ</th>
+              </tr>
+            </thead>
+            <tbody id="modalDetectionsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Macros -->
+      <div class="tab-pane" id="tabMacros">
+        <div class="table-responsive modal-table-wrap">
+          <table class="ocean-table modal-table">
+            <thead>
+              <tr>
+                <th>TEHDİT</th>
+                <th>TÜR</th>
+                <th>MAKRO / OTO-TIKLAYICI TANIMI</th>
+                <th>DOSYA / SCRIPT / PENCERE YOLU</th>
+              </tr>
+            </thead>
+            <tbody id="modalMacrosBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 3: BAM -->
+      <div class="tab-pane" id="tabBam">
+        <div class="table-responsive modal-table-wrap">
+          <table class="ocean-table modal-table">
+            <thead>
+              <tr>
+                <th>DOSYA ADI</th>
+                <th>SON ÇALIŞTIRMA TARİHİ</th>
+                <th>DURUM</th>
+                <th>TAM YOL (KAYIT DEFTERİ)</th>
+              </tr>
+            </thead>
+            <tbody id="modalBamBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 4: DLLs -->
+      <div class="tab-pane" id="tabDlls">
+        <div class="table-responsive modal-table-wrap">
+          <table class="ocean-table modal-table">
+            <thead>
+              <tr>
+                <th>SÜREÇ</th>
+                <th>MODÜL (DLL)</th>
+                <th>DURUM</th>
+                <th>BELLEK BOYUTU</th>
+                <th>DOSYA YOLU</th>
+              </tr>
+            </thead>
+            <tbody id="modalDllsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Processes -->
+      <div class="tab-pane" id="tabProcs">
+        <div class="table-responsive modal-table-wrap">
+          <table class="ocean-table modal-table">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>SÜREÇ ADI</th>
+                <th>ORİJİNAL ADI (PE)</th>
+                <th>DURUM</th>
+                <th>DOSYA YOLU</th>
+              </tr>
+            </thead>
+            <tbody id="modalProcsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-left">
+          <button class="btn btn-danger" onclick="copyCurrentBanCommand()">
+            <i class="fa-solid fa-gavel"></i> MTA Ban Komutunu Kopyala
+          </button>
+          <button class="btn btn-secondary" onclick="exportReportTxt()">
+            <i class="fa-solid fa-file-lines"></i> Raporu İndir (.txt)
+          </button>
+        </div>
+        <button class="btn btn-secondary" onclick="closeInspectModal()">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CLIENT DOWNLOAD ================= -->
+  <div class="modal-overlay" id="downloadModal">
+    <div class="modal-dialog glass-panel" style="max-width: 600px;">
+      <div class="modal-header">
+        <div>
+          <div class="modal-badge">ŞÜPHELİ İSTEMCİSİ</div>
+          <h2 class="modal-title"><i class="fa-solid fa-download"></i> RetroAC_Scanner.exe İndir</h2>
+        </div>
+        <button class="modal-close" onclick="closeDownloadModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Hile kontrolü yapacağınız oyuncuya aşağıdaki indirme linkini ve oluşturduğunuz <strong>PIN kodunu</strong> iletin:
+        </p>
+        <div class="download-box">
+          <div class="dl-info">
+            <strong>RetroAC_Scanner.exe</strong>
+            <div style="font-size:12px; color:rgba(255,255,255,.5); margin-top:2px;">C# Standalone Native • Kurulum Gerektirmez</div>
+          </div>
+          <a href="/download/scanner" class="btn btn-primary">
+            <i class="fa-solid fa-arrow-down-to-bracket"></i> İndir
+          </a>
+        </div>
+        <div class="code-box">
+          <code>Şüpheliye gönderilecek hazır metin:</code>
+          <pre id="preSuspectInstructions"></pre>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="closeDownloadModal()">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: DISCORD SETTINGS ================= -->
+  <div class="modal-overlay" id="discordModal">
+    <div class="modal-dialog glass-panel" style="max-width: 550px;">
+      <div class="modal-header">
+        <div>
+          <div class="modal-badge">ENTEGRASYON</div>
+          <h2 class="modal-title"><i class="fa-brands fa-discord"></i> Discord Webhook Ayarları</h2>
+        </div>
+        <button class="modal-close" onclick="closeDiscordModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label for="txtDiscordWebhook">Discord Kanal Webhook URL:</label>
+          <input type="text" id="txtDiscordWebhook" placeholder="https://discord.com/api/webhooks/..." style="width: 100%;">
+        </div>
+        <p class="modal-desc" style="margin-top: 10px;">
+          Kontrol açıldığında, oyuncu onay/ret verdiğinde veya kara liste hilesi yakalandığında Discord kanalınıza otomatik zengin loglar düşer.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="saveDiscordSettings()">Ayarları Kaydet</button>
+        <button class="btn btn-secondary" onclick="closeDiscordModal()">İptal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "retroanticheat",
+  "version": "1.0.0",
+  "description": "Retro Roleplay Anti-Cheat — Ocean Edition Forensic Suite for MTA:SA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "anticheat",
+    "mtasa",
+    "retro-roleplay",
+    "ocean-edition"
+  ],
+  "author": "Retro Roleplay",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.x"
+  }
+}
