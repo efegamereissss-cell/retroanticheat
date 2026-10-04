@@ -125,26 +125,40 @@ const server = http.createServer((req, res) => {
     if (pathname === '/' || pathname === '/index.html') {
         return serveFile(res, path.join(__dirname, 'public', 'index.html'), 'text/html');
     }
-    if (pathname === '/style.css') {
-        return serveFile(res, path.join(__dirname, 'public', 'style.css'), 'text/css');
-    }
-    if (pathname === '/app.js') {
-        return serveFile(res, path.join(__dirname, 'public', 'app.js'), 'application/javascript');
-    }
 
-    // Serve Scanner Binary download if requested
+    // Serve Scanner Binary download explicitly
     if (pathname === '/download/scanner' || pathname === '/api/download/scanner') {
-        let scannerPath = path.join(__dirname, '..', 'retro_ac_csharp', 'Bin', 'RetroAC_Scanner.exe');
+        let scannerPath = path.join(__dirname, 'public', 'RetroAC_Scanner.exe');
         if (!fs.existsSync(scannerPath)) {
-            scannerPath = path.join(__dirname, 'public', 'RetroAC_Scanner.exe');
+            scannerPath = path.join(__dirname, '..', 'retro_ac_csharp', 'Bin', 'RetroAC_Scanner.exe');
         }
         if (fs.existsSync(scannerPath)) {
             res.setHeader('Content-Disposition', 'attachment; filename="RetroAC_Scanner.exe"');
             return serveFile(res, scannerPath, 'application/octet-stream');
-        } else {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: "Scanner binary not found on server." }));
         }
+    }
+
+    // Serve any file from public/ directory
+    const cleanPath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+    const staticFilePath = path.join(__dirname, 'public', cleanPath);
+    if (fs.existsSync(staticFilePath) && fs.statSync(staticFilePath).isFile()) {
+        const ext = path.extname(staticFilePath).toLowerCase();
+        const mimeTypes = {
+            '.html': 'text/html',
+            '.css': 'text/css',
+            '.js': 'application/javascript',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.ico': 'image/x-icon',
+            '.webp': 'image/webp',
+            '.mp4': 'video/mp4',
+            '.exe': 'application/octet-stream'
+        };
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+        return serveFile(res, staticFilePath, contentType);
     }
 
     // ================= REAL-TIME SSE STREAM =================
