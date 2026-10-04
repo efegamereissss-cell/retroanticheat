@@ -39,28 +39,9 @@ let currentAuthToken = null;
 let activeEventSource = null;
 let isTamperTriggered = false;
 
-function triggerTamperLock(reason = "Tersine Mühendislik veya DOM Müdahalesi Tespit Edildi!") {
-    if (isTamperTriggered) return;
-    isTamperTriggered = true;
-    localStorage.removeItem('retro_admin_auth');
-    currentAuthToken = null;
-
-    playSound('alert');
-
-    // Wipe body and show lock screen
-    document.body.innerHTML = `
-        <div class="tamper-lockout-screen">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <h1>GÜVENLİK İHLALİ: TERSİNE MÜHENDİSLİK TESPİT EDİLDİ</h1>
-            <p>${escapeHtml(reason)}<br>Giriş ekranı veya yetkili paneli doğrudan manipüle edilmeye çalışıldı. Sistem güvenliği için sayfa imha edildi.</p>
-            <button class="btn btn-primary" style="margin-top: 15px; padding: 15px 30px; font-weight: 800; border-radius: 50px;" onclick="location.reload()">
-                <i class="fa-solid fa-arrows-rotate"></i> Yeniden Başlat & Giriş Yap
-            </button>
-        </div>
-    `;
-
-    console.warn(`%c[RETRO AC SENTINEL] %c${reason}`, 'background: #ff0055; color: #fff; font-size: 16px; font-weight: bold; padding: 6px;', 'color: #00dfd8; font-size: 13px;');
-    throw new Error('SECURITY_TAMPER_DETECTED: ' + reason);
+function triggerTamperLock(reason = "") {
+    console.log('[Retro AC Security]', reason);
+    handleUnauthorized();
 }
 
 function handleUnauthorized() {
@@ -282,72 +263,10 @@ async function performAdminLogout() {
     showToast('Oturum kapatıldı.', 'info');
 }
 
-// ================= ANTI-TAMPER SENTINEL (DOM & REVERSE-ENGINEERING WATCHDOG) =================
+// ================= CLIENT SECURITY WATCHDOG =================
 function initAntiTamperSentinel() {
-    const observer = new MutationObserver(() => {
-        if (currentAuthToken) return;
-
-        const overlayEl = document.getElementById('authGateOverlay');
-        const protectedEl = document.getElementById('protectedApp');
-
-        if (!overlayEl || !document.body.contains(overlayEl)) {
-            triggerTamperLock("Giriş kapısı DOM'dan silinmeye çalışıldı.");
-            return;
-        }
-
-        const style = window.getComputedStyle(overlayEl);
-        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0' || overlayEl.classList.contains('hidden')) {
-            triggerTamperLock("Giriş kapısı CSS ile gizlenmeye çalışıldı.");
-            return;
-        }
-
-        if (protectedEl && !protectedEl.classList.contains('locked')) {
-            triggerTamperLock("Yetkisiz panel kilidi açılmaya çalışıldı.");
-            return;
-        }
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['style', 'class', 'hidden']
-    });
-
-    // Keyboard Shortcuts Interceptor
-    window.addEventListener('keydown', (e) => {
-        if (currentAuthToken) return;
-
-        if (e.key === 'F12') {
-            e.preventDefault();
-            playSound('alert');
-            showToast('⚠️ F12 Geliştirici Araçları bu ekranda engellenmiştir.', 'danger');
-            return false;
-        }
-
-        if (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) {
-            e.preventDefault();
-            playSound('alert');
-            showToast('⚠️ Geliştirici Araçları kısayolları kilitlidir.', 'danger');
-            return false;
-        }
-
-        if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-            e.preventDefault();
-            playSound('alert');
-            return false;
-        }
-    }, true);
-
-    // Prevent context menu on login screen
-    window.addEventListener('contextmenu', (e) => {
-        if (!currentAuthToken) {
-            e.preventDefault();
-            playSound('click');
-            showToast('🛡️ Retro AC Sentinel: Sağ tık menüsü kilitlidir.', 'info');
-            return false;
-        }
-    });
+    // Security is cleanly enforced at server-level via 401 authorization.
+    // False-positive DOM watcher removed to guarantee uninterrupted user experience.
 }
 
 // ================= 3D INTERACTIVE TILT FOR LOGIN CARD =================
