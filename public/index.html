@@ -30,172 +30,112 @@
       <div class="auth-scanline"></div>
     </div>
 
-    <div class="auth-gate-card glass-panel wide-cockpit" id="authGateCard">
-      <!-- Animated Border Light Beam -->
-      <div class="card-border-beam"></div>
+    <!-- Fullscreen Minimalist Cockpit HUD Header -->
+    <header class="auth-fullscreen-header">
+      <div class="auth-fs-brand">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>RETRO <strong>AC</strong></span>
+        <span class="auth-fs-tag">ENTERPRISE v1.2</span>
+      </div>
+      <div class="auth-fs-meta">
+        <span class="hud-pill"><span class="live-pulse-dot"></span> SİSTEM: ÇEVRİMİÇİ</span>
+        <span class="hud-pill"><i class="fa-solid fa-cloud-bolt"></i> KEYAUTH CLOUD</span>
+        <span class="hud-clock" id="authHudClock">--:--:--</span>
+      </div>
+    </header>
 
-      <!-- Cockpit Top HUD Bar -->
-      <div class="auth-cockpit-topbar">
-        <div class="cockpit-brand">
-          <i class="fa-solid fa-shield-halved"></i>
-          <span>RETRO ROLEPLAY // ADLİ VE GÜVENLİK KONTROL MERKEZİ</span>
+    <!-- Dead-Center Elegant Monolithic Login Card -->
+    <main class="auth-fullscreen-center">
+      <div class="auth-gate-card glass-panel auth-minimal-card" id="authGateCard">
+        <!-- Animated Border Light Beam -->
+        <div class="card-border-beam"></div>
+
+        <!-- Minimal Hologram Shield HUD -->
+        <div class="overlord-shield-icon">
+          <span class="tick top"></span>
+          <span class="tick bottom"></span>
+          <span class="tick left"></span>
+          <span class="tick right"></span>
+          <span class="dot one"></span>
+          <span class="dot two"></span>
+          <span class="dot three"></span>
+          <span class="dot four"></span>
+          <span class="scan"></span>
+          <svg class="shield-svg" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gateShieldGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="50%" stop-color="var(--accent)" />
+                <stop offset="100%" stop-color="var(--accent-dark)" />
+              </linearGradient>
+              <linearGradient id="rgbShieldBeam" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ff0055"/>
+                <stop offset="50%" stop-color="#7928ca"/>
+                <stop offset="100%" stop-color="#00dfd8"/>
+              </linearGradient>
+            </defs>
+            <path d="M50 5 L88 19 V48 C88 73 72 91 50 104 C28 91 12 73 12 48 V19 Z"
+                  fill="var(--accent-dim)" stroke="url(#rgbShieldBeam)" stroke-width="3" stroke-linejoin="round" />
+            <path d="M50 13 L79 24 V47 C79 65 67 80 50 91 C33 80 21 65 21 47 V24 Z"
+                  fill="url(#gateShieldGradient)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round" />
+          </svg>
         </div>
-        <div class="cockpit-hud-meta">
-          <span class="hud-pill"><span class="live-pulse-dot"></span> SİSTEM: ÇEVRİMİÇİ</span>
-          <span class="hud-pill"><i class="fa-solid fa-cloud-bolt"></i> KEYAUTH v1.2</span>
-          <span class="hud-clock" id="authHudClock">--:--:--</span>
+
+        <!-- Live KeyAuth Secured Badge -->
+        <div class="auth-gate-badge">
+          <span class="live-pulse-dot"></span>
+          <span>ADMIN AUTHENTICATION GATEWAY</span>
+        </div>
+
+        <!-- HUGE RGB TITLE (SADE VE ÇOK ŞIK) -->
+        <div class="auth-title-container">
+          <h1 class="auth-rgb-main-title">
+            <span class="rgb-gradient-retro">RETRO AC</span>
+            <span class="rgb-neon-sub">LOGIN</span>
+          </h1>
+          <div class="auth-rgb-bar"></div>
+        </div>
+
+        <p class="auth-gate-desc">
+          Yönetici yetkilendirme sistemi <strong>KeyAuth Cloud Security</strong> ile kilitlenmiştir.
+        </p>
+
+        <form id="authLoginForm" onsubmit="event.preventDefault(); performAdminLogin();">
+          <div class="auth-input-group">
+            <label for="adminKeyInput"><i class="fa-solid fa-key"></i> KeyAuth Lisans Anahtarı:</label>
+            <div class="auth-input-wrapper">
+              <i class="fa-solid fa-fingerprint auth-key-icon"></i>
+              <input type="password" id="adminKeyInput" placeholder="RETRO-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" required>
+              <button type="button" class="btn-toggle-key" onclick="toggleKeyVisibility()" title="Anahtarı Göster/Gizle">
+                <i class="fa-solid fa-eye" id="toggleKeyIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-status-box" id="authStatusBox" style="display: none;"></div>
+
+          <button type="submit" class="btn btn-primary btn-auth-submit" id="btnAuthSubmit">
+            <span class="btn-glow-layer"></span>
+            <span class="btn-content-label"><i class="fa-solid fa-arrow-right-to-bracket"></i> Paneli Aç (Giriş Yap)</span>
+          </button>
+        </form>
+
+        <div class="auth-gate-footer">
+          <div class="auth-app-tag">
+            <i class="fa-solid fa-circle-check" style="color: #10b981;"></i> KeyAuth v1.0 • App: <code>retroac</code>
+          </div>
+          <div class="auth-tamper-warning">
+            <i class="fa-solid fa-shield-halved"></i> Sentinel Anti-Tamper Aktif • Tersine Mühendislik Korumalı
+          </div>
         </div>
       </div>
+    </main>
 
-      <!-- Main 3-Column Panoramic Cockpit Grid -->
-      <div class="auth-cockpit-grid">
-
-        <!-- LEFT WING: SYSTEM TELEMETRY -->
-        <aside class="auth-cockpit-wing wing-left">
-          <div class="wing-header">
-            <i class="fa-solid fa-microchip"></i>
-            <span>SİSTEM TELEMETRİSİ</span>
-          </div>
-          <div class="wing-items">
-            <div class="wing-stat-item">
-              <span class="wing-label">Bellek Motoru</span>
-              <span class="wing-value badge-green">Kernel/Ring-3 Canlı</span>
-            </div>
-            <div class="wing-stat-item">
-              <span class="wing-label">Sentinel Koruması</span>
-              <span class="wing-value badge-green">Armed [AKTİF]</span>
-            </div>
-            <div class="wing-stat-item">
-              <span class="wing-label">Oturum Şifreleme</span>
-              <span class="wing-value badge-cyan">AES-256 GCM</span>
-            </div>
-            <div class="wing-stat-item">
-              <span class="wing-label">Sunucu Düğümü</span>
-              <span class="wing-value badge-purple">Vercel Edge Global</span>
-            </div>
-            <div class="wing-stat-item">
-              <span class="wing-label">Oyun Entegrasyonu</span>
-              <span class="wing-value badge-cyan">MTA San Andreas 1.6+</span>
-            </div>
-          </div>
-          <div class="wing-mini-graph">
-            <div class="graph-bar" style="height: 40%"></div>
-            <div class="graph-bar" style="height: 65%"></div>
-            <div class="graph-bar" style="height: 85%"></div>
-            <div class="graph-bar" style="height: 50%"></div>
-            <div class="graph-bar" style="height: 90%"></div>
-            <div class="graph-bar" style="height: 70%"></div>
-            <div class="graph-bar" style="height: 100%"></div>
-          </div>
-        </aside>
-
-        <!-- CENTER CONSOLE: THE MAIN LOGIN (TAM ORTADA GİRİŞ) -->
-        <main class="auth-cockpit-center">
-          <!-- Holographic Overlord Shield HUD -->
-          <div class="overlord-shield-icon">
-            <span class="tick top"></span>
-            <span class="tick bottom"></span>
-            <span class="tick left"></span>
-            <span class="tick right"></span>
-            <span class="dot one"></span>
-            <span class="dot two"></span>
-            <span class="dot three"></span>
-            <span class="dot four"></span>
-            <span class="scan"></span>
-            <svg class="shield-svg" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="gateShieldGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
-                  <stop offset="50%" stop-color="var(--accent)" />
-                  <stop offset="100%" stop-color="var(--accent-dark)" />
-                </linearGradient>
-                <linearGradient id="rgbShieldBeam" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#ff0055"/>
-                  <stop offset="50%" stop-color="#7928ca"/>
-                  <stop offset="100%" stop-color="#00dfd8"/>
-                </linearGradient>
-              </defs>
-              <path d="M50 5 L88 19 V48 C88 73 72 91 50 104 C28 91 12 73 12 48 V19 Z"
-                    fill="var(--accent-dim)" stroke="url(#rgbShieldBeam)" stroke-width="3.5" stroke-linejoin="round" />
-              <path d="M50 13 L79 24 V47 C79 65 67 80 50 91 C33 80 21 65 21 47 V24 Z"
-                    fill="url(#gateShieldGradient)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round" />
-            </svg>
-          </div>
-
-          <!-- Live KeyAuth Secured Badge -->
-          <div class="auth-gate-badge">
-            <span class="live-pulse-dot"></span>
-            <i class="fa-solid fa-shield-virus"></i> KEYAUTH v1.2 • ENCRYPTED GATEWAY
-          </div>
-
-          <!-- HUGE RGB TITLE REQUESTED BY USER -->
-          <div class="auth-title-container">
-            <h1 class="auth-rgb-main-title">
-              <span class="rgb-gradient-retro">RETRO AC</span>
-              <span class="rgb-neon-sub">LOGIN</span>
-            </h1>
-            <div class="auth-rgb-bar"></div>
-          </div>
-
-          <p class="auth-gate-desc">
-            Bu kontrol merkezi <strong>KeyAuth Cloud Security</strong> ile kilitlenmiştir. Yönetici paneline erişmek için yetkili lisans anahtarınızı giriniz.
-          </p>
-
-          <form id="authLoginForm" onsubmit="event.preventDefault(); performAdminLogin();">
-            <div class="auth-input-group">
-              <label for="adminKeyInput"><i class="fa-solid fa-fingerprint"></i> KeyAuth Lisans Anahtarı:</label>
-              <div class="auth-input-wrapper">
-                <i class="fa-solid fa-key auth-key-icon"></i>
-                <input type="password" id="adminKeyInput" placeholder="RETRO-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" required>
-                <button type="button" class="btn-toggle-key" onclick="toggleKeyVisibility()" title="Anahtarı Göster/Gizle">
-                  <i class="fa-solid fa-eye" id="toggleKeyIcon"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="auth-status-box" id="authStatusBox" style="display: none;"></div>
-
-            <button type="submit" class="btn btn-primary btn-auth-submit" id="btnAuthSubmit">
-              <span class="btn-glow-layer"></span>
-              <span class="btn-content-label"><i class="fa-solid fa-bolt"></i> Paneli Aç (Giriş Yap)</span>
-            </button>
-          </form>
-        </main>
-
-        <!-- RIGHT WING: BLACKLIST RADAR -->
-        <aside class="auth-cockpit-wing wing-right">
-          <div class="wing-header">
-            <i class="fa-solid fa-radar"></i>
-            <span>KARA LİSTE TEHDİT RADARI</span>
-          </div>
-          <div class="blacklist-radar-list">
-            <div class="radar-item threat"><span class="radar-tag">YASAKLI</span> <code>Nexida.exe</code></div>
-            <div class="radar-item threat"><span class="radar-tag">YASAKLI</span> <code>justicescales.exe</code></div>
-            <div class="radar-item threat"><span class="radar-tag">YASAKLI</span> <code>storksoftware.exe</code></div>
-            <div class="radar-item threat"><span class="radar-tag">YASAKLI</span> <code>lnixsoftware.exe</code></div>
-            <div class="radar-item threat"><span class="radar-tag">YASAKLI</span> <code>mtasacheat.exe</code></div>
-            <div class="radar-item threat"><span class="radar-tag">YASAKLI</span> <code>cheatmta.exe</code></div>
-            <div class="radar-item threat"><span class="radar-tag">YASAKLI</span> <code>mtasancheat.exe</code></div>
-            <div class="radar-item macro"><span class="radar-tag warn">MAKRO</span> <code>AutoHotkey / Hook</code></div>
-          </div>
-          <div class="wing-footer-badge">
-            <i class="fa-solid fa-ban"></i> 8/8 Algılama İmzası Yüklü
-          </div>
-        </aside>
-
-      </div> <!-- /.auth-cockpit-grid -->
-
-      <!-- Cockpit Bottom Footer -->
-      <div class="auth-gate-footer">
-        <div class="auth-app-tag">
-          <i class="fa-solid fa-circle-check" style="color: #10b981;"></i> KeyAuth v1.0 • App: <code>retroac</code>
-        </div>
-        <p class="auth-hint">Lisans anahtarınızı keyauth.cc panelinden oluşturabilirsiniz.</p>
-        <div class="auth-tamper-warning">
-          <i class="fa-solid fa-shield-halved"></i> Sentinel Anti-Tamper Aktif • Tersine Mühendislik Korumalı
-        </div>
-      </div>
-    </div>
+    <!-- Fullscreen Minimalist Footer -->
+    <footer class="auth-fullscreen-footer">
+      <span class="auth-footer-tag"><i class="fa-solid fa-fingerprint"></i> ADLİ DENETİM VE KORUMA MOTORU // MTA SAN ANDREAS 1.6+</span>
+      <span class="auth-footer-copy">© 2026 RETRO ROLEPLAY • TÜM HAKLARI SAKLIDIR</span>
+    </footer>
   </div>
 
   <!-- ================= PROTECTED ADMIN DASHBOARD APPLICATION (LOCKED UNTIL AUTHENTICATED) ================= -->
